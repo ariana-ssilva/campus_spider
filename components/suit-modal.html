@@ -1,0 +1,36 @@
+<div id="suitModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="suitModalTitle">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 id="suitModalTitle">Escolha os naipes (assuntos)</h3>
+      <button id="closeSuitModalBtn" class="modal-close-btn" type="button" aria-label="Fechar escolha de naipes">Fechar</button>
+    </div>
+    <p>
+      Defina a dificuldade estilo Spider:
+      <strong>1</strong> naipe (facil), <strong>2</strong> naipes (medio), <strong>4</strong> naipes (dificil).
+    </p>
+    <div class="suit-options">
+      <button class="btn-primary suit-choice-btn" data-suits="1">1 Naipe</button>
+      <button class="btn-primary suit-choice-btn" data-suits="2">2 Naipes</button>
+      <button class="btn-primary suit-choice-btn" data-suits="4">4 Naipes</button>
+    </div>
+    <p id="suitModalMessage" class="message"></p>
+  </div>
+</div>
+
+<div id="winModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="winModalTitle">
+  <div class="modal-card congrats-card">
+    <h3 id="winModalTitle">Parabens! Partida concluida</h3>
+    <p>Voce finalizou todas as sequencias no estilo Spider.</p>
+    <div class="congrats-metrics">
+      <span>Pontuacao: <strong id="winScoreValue">0</strong></span>
+      <span>Movimentos: <strong id="winMovesValue">0</strong></span>
+      <span>Tempo: <strong id="winTimeValue">00:00</strong></span>
+      <span>Ultima Pontuacao: <strong id="winLastScoreValue">0</strong></span>
+      <span>Melhor Pontuacao: <strong id="winBestScoreValue">0</strong></span>
+    </div>
+    <div class="congrats-actions">
+      <button id="playAgainBtn" class="btn-primary">Jogar novamente</button>
+      <button id="closeToHomeBtn" class="btn-outline">Fechar</button>
+    </div>
+  </div>
+</div>

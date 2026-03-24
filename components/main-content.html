@@ -1,0 +1,354 @@
+<section id="authSection" class="auth-panel">
+  <div class="auth-split">
+    <div class="auth-brand-side">
+      <div class="auth-brand-visual">
+        <img src="logo.png" alt="Logo Spider EDU" class="auth-brand-logo" />
+      </div>
+      <h2>Spider EDU</h2>
+      <p class="auth-brand-copy">Aprenda jogando. Evolua a cada jogada.</p>
+    </div>
+
+    <div class="auth-form-side">
+      <div class="panel auth-card">
+        <div class="auth-mode-switch" role="tablist" aria-label="Alternar autenticacao">
+          <button type="button" id="showLoginBtn" class="auth-mode-btn active" role="tab" aria-selected="true">Entrar</button>
+          <button type="button" id="showRegisterBtn" class="auth-mode-btn" role="tab" aria-selected="false">Cadastrar</button>
+        </div>
+        <h2 id="authTitle">Entrar</h2>
+
+        <div class="auth-forms-wrap">
+          <form id="loginForm" class="form-grid auth-form auth-form-active">
+            <label>
+              Email
+              <input type="email" id="email" placeholder="Digite seu email" required />
+            </label>
+            <label>
+              Senha
+              <div class="password-field">
+                <input type="password" id="password" placeholder="Digite sua senha" required />
+                <button type="button" class="password-toggle" data-target-input="password" aria-label="Mostrar senha">👁</button>
+              </div>
+            </label>
+            <button type="submit" class="btn-primary">Entrar</button>
+          </form>
+
+          <form id="registerForm" class="form-grid auth-form">
+            <label>
+              Nome
+              <input type="text" id="registerName" placeholder="Digite seu nome" required />
+            </label>
+            <label>
+              Email
+              <input type="email" id="registerEmail" placeholder="Digite seu email" required />
+            </label>
+            <label>
+              Senha
+              <div class="password-field">
+                <input type="password" id="registerPassword" placeholder="Crie uma senha" required />
+                <button type="button" class="password-toggle" data-target-input="registerPassword" aria-label="Mostrar senha">👁</button>
+              </div>
+            </label>
+            <label>
+              Confirmar senha
+              <div class="password-field">
+                <input type="password" id="registerPasswordConfirm" placeholder="Repita sua senha" required />
+                <button type="button" class="password-toggle" data-target-input="registerPasswordConfirm" aria-label="Mostrar senha">👁</button>
+              </div>
+            </label>
+            <button type="submit" class="btn-primary">Criar conta</button>
+          </form>
+        </div>
+
+        <div class="auth-links">
+          <a href="#" role="button">Esqueceu a senha?</a>
+        </div>
+
+        <details class="demo-users">
+          <summary>Contas de teste</summary>
+          <ul>
+            <li>Professor: prof@campus.com / 123456</li>
+            <li>Aluno 1: aluno1@campus.com / 123456</li>
+            <li>Aluno 2: aluno2@campus.com / 123456</li>
+          </ul>
+        </details>
+        <p id="authMessage" class="message"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="studentSection" class="hidden">
+  <div class="student-layout">
+    <div class="main-column">
+      <div class="panel dashboard">
+        <div class="student-dashboard-header">
+          <h2>Painel do Aluno</h2>
+          <p id="studentWelcome"></p>
+        </div>
+        <div class="stats student-stats-row">
+          <div class="stat-card">
+            <span>XP</span>
+            <strong id="xpValue">0</strong>
+          </div>
+          <div class="stat-card">
+            <span>Nivel</span>
+            <strong id="levelValue">1</strong>
+          </div>
+          <div class="stat-card">
+            <span>Partidas</span>
+            <strong id="matchesValue">0</strong>
+          </div>
+          <div class="stat-card">
+            <span>Ultima Pontuacao</span>
+            <strong id="lastScoreValue">0</strong>
+          </div>
+          <div class="stat-card">
+            <span>Melhor Pontuacao</span>
+            <strong id="bestScoreValue">0</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel game-controls">
+        <button id="newGameBtn" class="btn-primary">Novo jogo</button>
+        <button id="dealBtn" class="btn-outline">Distribuir pilha</button>
+        <button id="undoBtn" class="btn-outline">Desfazer</button>
+        <p id="gameMessage" class="message"></p>
+      </div>
+
+      <section class="game-board-wrap">
+        <div class="board-metrics">
+          <span class="metric-chip">Tempo: <strong id="metricTime" class="metric-value">00:00</strong></span>
+          <span class="metric-chip">Movimentos: <strong id="metricMoves" class="metric-value">0</strong></span>
+          <span class="metric-chip">Pontuacao: <strong id="metricScore" class="metric-value">0</strong></span>
+        </div>
+
+        <div class="board-topbar">
+          <div class="completed-area">
+            <div class="completed-header">
+              <h3>Sequencias concluidas</h3>
+              <span id="completedCount">0/8</span>
+            </div>
+            <div id="completedBoard" class="completed-board"></div>
+          </div>
+          <div class="stock-area">
+            <h3>Pilha restante</h3>
+            <button id="stockBtn" class="stock-btn" aria-label="Distribuir pilha restante">
+              <span id="stockCount" class="stock-count">0</span>
+            </button>
+          </div>
+        </div>
+        <div id="board" class="board"></div>
+      </section>
+    </div>
+
+    <aside class="side-column">
+      <div class="panel side-card">
+        <h3>Desafio Atual</h3>
+        <p id="challengeTheme" class="side-title">-</p>
+        <p id="challengeObjective">-</p>
+      </div>
+
+      <div class="panel side-card">
+        <h3>Ranking</h3>
+        <div id="studentRanking"></div>
+      </div>
+
+      <div class="panel side-card">
+        <h3>Progresso do Aluno</h3>
+        <div class="progress-grid">
+          <p>Acertos: <strong id="progressAccuracy">0%</strong></p>
+          <p>Desafios: <strong id="progressChallenges">0/8</strong></p>
+          <p>Medalhas: <strong id="progressMedals">0</strong></p>
+        </div>
+        <div class="xp-track">
+          <div id="progressXpBar" class="xp-fill"></div>
+        </div>
+        <p class="xp-caption"><strong id="progressXpCurrent">0</strong> / <span id="progressXpTarget">150</span> XP</p>
+      </div>
+
+      <div class="panel side-card">
+        <h3>Sequencia</h3>
+        <p id="streakInfo">0 vitorias</p>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<section id="teacherSection" class="panel hidden">
+  <h2>Painel do Professor</h2>
+  <p>Gerencie palavras do jogo e acompanhe desempenho dos alunos.</p>
+
+  <div class="teacher-content">
+    <div class="teacher-panel-section" data-teacher-view="words">
+      <div class="teacher-grid">
+        <div class="teacher-box">
+          <h3>Adicionar palavra</h3>
+          <form id="wordForm" class="form-grid">
+            <label>
+              Palavra
+              <input type="text" id="wordInput" required />
+            </label>
+            <label>
+              Tema
+              <input type="text" id="themeInput" required />
+            </label>
+            <label>
+              Dificuldade (1-13)
+              <input type="number" id="difficultyInput" min="1" max="13" required />
+            </label>
+            <button type="submit" class="btn-primary">Salvar palavra</button>
+          </form>
+        </div>
+
+        <div class="teacher-box">
+          <h3>Banco de palavras</h3>
+          <ul id="wordList" class="word-list"></ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="teacher-panel-section hidden" data-teacher-view="users">
+      <div class="teacher-grid">
+        <div class="teacher-box teacher-box-wide">
+          <h3>CRUD de usuarios</h3>
+          <form id="userForm" class="form-grid teacher-form-grid">
+            <input type="hidden" id="userIdInput" />
+            <label>
+              Nome
+              <input type="text" id="userNameInput" required />
+            </label>
+            <label>
+              Email
+              <input type="email" id="userEmailInput" required />
+            </label>
+            <label>
+              Senha
+              <input type="text" id="userPasswordInput" required />
+            </label>
+            <label>
+              Perfil
+              <select id="userRoleInput" required>
+                <option value="student">Aluno</option>
+                <option value="teacher">Professor</option>
+              </select>
+            </label>
+            <label>
+              XP
+              <input type="number" id="userXpInput" min="0" value="0" required />
+            </label>
+            <label>
+              Partidas
+              <input type="number" id="userMatchesInput" min="0" value="0" required />
+            </label>
+            <div class="teacher-form-actions">
+              <button type="submit" class="btn-primary">Salvar usuario</button>
+              <button type="button" id="cancelUserEditBtn" class="btn-outline">Cancelar edicao</button>
+            </div>
+          </form>
+
+          <div class="table-wrap">
+            <table class="ranking-table">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Email</th>
+                  <th>Perfil</th>
+                  <th>XP</th>
+                  <th>Partidas</th>
+                  <th>Acoes</th>
+                </tr>
+              </thead>
+              <tbody id="userCrudBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="teacher-panel-section hidden" data-teacher-view="games">
+      <div class="teacher-grid">
+        <div class="teacher-box teacher-box-wide">
+          <h3>CRUD de jogos</h3>
+          <form id="gameForm" class="form-grid teacher-form-grid">
+            <input type="hidden" id="gameIdInput" />
+            <label>
+              Jogador
+              <select id="gameUserInput" required></select>
+            </label>
+            <label>
+              Naipe(s)
+              <select id="gameSuitCountInput" required>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="4">4</option>
+              </select>
+            </label>
+            <label>
+              Resultado
+              <select id="gameResultInput" required>
+                <option value="win">Vitoria</option>
+                <option value="loss">Derrota</option>
+                <option value="abandoned">Abandonado</option>
+              </select>
+            </label>
+            <label>
+              Pontuacao
+              <input type="number" id="gameScoreInput" min="0" value="0" required />
+            </label>
+            <label>
+              Movimentos
+              <input type="number" id="gameMovesInput" min="0" value="0" required />
+            </label>
+            <label>
+              Duracao (s)
+              <input type="number" id="gameDurationInput" min="0" value="0" required />
+            </label>
+            <div class="teacher-form-actions">
+              <button type="submit" class="btn-primary">Salvar jogo</button>
+              <button type="button" id="cancelGameEditBtn" class="btn-outline">Cancelar edicao</button>
+            </div>
+          </form>
+
+          <div class="table-wrap">
+            <table class="ranking-table">
+              <thead>
+                <tr>
+                  <th>Jogador</th>
+                  <th>Resultado</th>
+                  <th>Naipe(s)</th>
+                  <th>Pontos</th>
+                  <th>Mov.</th>
+                  <th>Duracao</th>
+                  <th>Data</th>
+                  <th>Acoes</th>
+                </tr>
+              </thead>
+              <tbody id="gameCrudBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="teacher-panel-section hidden" data-teacher-view="ranking">
+      <div class="teacher-grid">
+        <div class="teacher-box">
+          <h3>Ranking de alunos</h3>
+          <table class="ranking-table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>XP</th>
+                <th>Nivel</th>
+                <th>Partidas</th>
+              </tr>
+            </thead>
+            <tbody id="rankingBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p id="teacherMessage" class="message"></p>
+</section>
