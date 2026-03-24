@@ -41,5 +41,5 @@ def get_db_config() -> dict[str, Any]:
         "user": os.getenv("PGUSER", "postgres"),
         "password": os.getenv("PGPASSWORD", "postgres"),
         "database": os.getenv("PGDATABASE", "campus_spider"),
-        "sslmode": os.getenv("PGSSLMODE", "require"),
+        "sslmode": os.getenv("PGSSLMODE", "disable"),
     }
