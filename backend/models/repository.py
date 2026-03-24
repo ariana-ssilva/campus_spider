@@ -3,16 +3,17 @@ from __future__ import annotations
 from typing import Any
 
 try:
-    import psycopg2
-    from psycopg2 import Error as PsycopgError
-    from psycopg2.extras import RealDictCursor
-except ImportError:  # pragma: no cover
-    psycopg2 = None
+    import psycopg
+    from psycopg import Error as PsycopgError
+    from psycopg.rows import dict_row
+except ImportError as exc:  # pragma: no cover
+    psycopg = None
+    IMPORT_ERROR = exc
 
     class PsycopgError(Exception):
-        """Fallback error when psycopg2 is unavailable."""
-
-    RealDictCursor = None  # type: ignore[assignment]
+        """Fallback error when psycopg is unavailable."""
+else:
+    IMPORT_ERROR = None
 
 
 class RepositoryError(Exception):
@@ -25,14 +26,17 @@ class DataRepository:
         self._init_schema()
 
     def _connect(self):
-        if psycopg2 is None:
-            raise RuntimeError("Pacote psycopg2-binary nao encontrado no ambiente Python ativo.")
+        if psycopg is None:
+            raise RuntimeError(
+                "Pacote psycopg nao encontrado no ambiente Python ativo. "
+                f"Detalhe: {IMPORT_ERROR}"
+            )
 
         database_url = str(self.config.get("database_url") or "").strip()
         if database_url:
-            return psycopg2.connect(database_url, sslmode=self.config.get("sslmode", "require"))
+            return psycopg.connect(database_url, sslmode=self.config.get("sslmode", "require"))
 
-        return psycopg2.connect(
+        return psycopg.connect(
             host=self.config.get("host", "127.0.0.1"),
             port=int(self.config.get("port", 5432)),
             user=self.config.get("user", "postgres"),
@@ -92,7 +96,7 @@ class DataRepository:
     def read_bootstrap(self) -> dict[str, Any]:
         try:
             with self._connect() as conn:
-                with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                with conn.cursor(row_factory=dict_row) as cursor:
                     cursor.execute("SELECT * FROM users ORDER BY id ASC")
                     users = cursor.fetchall()
 
