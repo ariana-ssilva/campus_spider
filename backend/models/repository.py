@@ -33,7 +33,9 @@ class DataRepository:
             )
 
         database_url = str(self.config.get("database_url") or "").strip()
+        print(f"[DEBUG] database_url present: {bool(database_url)}")
         if database_url:
+            print(f"[DEBUG] database_url (first 60 chars): {database_url[:60]}")
             return psycopg.connect(database_url, sslmode=self.config.get("sslmode", "require"))
 
         return psycopg.connect(

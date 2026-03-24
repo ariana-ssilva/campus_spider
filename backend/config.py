@@ -29,9 +29,13 @@ _load_env_file()
 
 
 def get_db_config() -> dict[str, Any]:
+    db_url = os.getenv("DATABASE_URL", "").strip()
+    print(f"[DEBUG-CONFIG] DATABASE_URL env present: {bool(db_url)}")
+    if db_url:
+        print(f"[DEBUG-CONFIG] DATABASE_URL (first 60 chars): {db_url[:60]}")
     return {
         "engine": "postgres",
-        "database_url": os.getenv("DATABASE_URL", "").strip(),
+        "database_url": db_url,
         "host": os.getenv("PGHOST", "127.0.0.1"),
         "port": int(os.getenv("PGPORT", "5432")),
         "user": os.getenv("PGUSER", "postgres"),
