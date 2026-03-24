@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import os
 from http.server import ThreadingHTTPServer
 
 from backend.config import BASE_DIR, get_db_config
@@ -19,9 +20,10 @@ def main() -> None:
     AppHandler.controller = controller
     AppHandler.static_dir = BASE_DIR
 
-    server = ThreadingHTTPServer(("0.0.0.0", 8080), AppHandler)
+    port = int(os.getenv("PORT", "8080"))
+    server = ThreadingHTTPServer(("0.0.0.0", port), AppHandler)
     print(
-        "Servidor iniciado em http://localhost:8080 | "
+        f"Servidor iniciado em http://0.0.0.0:{port} | "
         f"MySQL: {db_config['user']}@{db_config['host']}:{db_config['port']}/{db_config['database']}"
     )
     server.serve_forever()
