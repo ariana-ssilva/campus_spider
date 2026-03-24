@@ -3,117 +3,120 @@ from __future__ import annotations
 from typing import Any
 
 try:
-    import mysql.connector as mysql_connector  # type: ignore[import-not-found]
-    from mysql.connector import Error as MySQLError  # type: ignore[import-not-found]
-except ImportError:
-    mysql_connector = None
+    import psycopg2
+    from psycopg2 import Error as PsycopgError
+    from psycopg2.extras import RealDictCursor
+except ImportError:  # pragma: no cover
+    psycopg2 = None
 
-    class MySQLError(Exception):
-        """Fallback error when mysql-connector-python is unavailable."""
+    class PsycopgError(Exception):
+        """Fallback error when psycopg2 is unavailable."""
+
+    RealDictCursor = None  # type: ignore[assignment]
+
+
+class RepositoryError(Exception):
+    """Application-level repository error for database operations."""
 
 
 class DataRepository:
     def __init__(self, config: dict[str, Any]) -> None:
         self.config = config
-        self._init_database_if_needed()
         self._init_schema()
 
     def _connect(self):
-        if mysql_connector is None:
-            raise RuntimeError(
-                "Pacote mysql-connector-python nao encontrado no ambiente Python ativo."
-            )
-        return mysql_connector.connect(**self.config)
+        if psycopg2 is None:
+            raise RuntimeError("Pacote psycopg2-binary nao encontrado no ambiente Python ativo.")
 
-    def _init_database_if_needed(self) -> None:
-        config_no_db = {k: v for k, v in self.config.items() if k != "database"}
-        database_name = self.config["database"]
-        if mysql_connector is None:
-            raise RuntimeError(
-                "Pacote mysql-connector-python nao encontrado no ambiente Python ativo."
-            )
-        conn = mysql_connector.connect(**config_no_db)
-        try:
-            cursor = conn.cursor()
-            cursor.execute(
-                f"CREATE DATABASE IF NOT EXISTS `{database_name}` "
-                "CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
-            )
-            conn.commit()
-        finally:
-            conn.close()
+        database_url = str(self.config.get("database_url") or "").strip()
+        if database_url:
+            return psycopg2.connect(database_url, sslmode=self.config.get("sslmode", "require"))
+
+        return psycopg2.connect(
+            host=self.config.get("host", "127.0.0.1"),
+            port=int(self.config.get("port", 5432)),
+            user=self.config.get("user", "postgres"),
+            password=self.config.get("password", ""),
+            dbname=self.config.get("database", "campus_spider"),
+            sslmode=self.config.get("sslmode", "disable"),
+        )
 
     def _init_schema(self) -> None:
-        with self._connect() as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                """
-                CREATE TABLE IF NOT EXISTS users (
-                    id INT PRIMARY KEY,
-                    name VARCHAR(120) NOT NULL,
-                    email VARCHAR(180) NOT NULL UNIQUE,
-                    password VARCHAR(255) NOT NULL,
-                    role VARCHAR(20) NOT NULL,
-                    xp INT NOT NULL DEFAULT 0,
-                    matches INT NOT NULL DEFAULT 0
-                ) ENGINE=InnoDB;
-                """
-            )
-            cursor.execute(
-                """
-                CREATE TABLE IF NOT EXISTS words (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    word VARCHAR(180) NOT NULL,
-                    theme VARCHAR(120) NOT NULL,
-                    difficulty INT NOT NULL
-                ) ENGINE=InnoDB;
-                """
-            )
-            cursor.execute(
-                """
-                CREATE TABLE IF NOT EXISTS games (
-                    id INT PRIMARY KEY,
-                    user_id INT NOT NULL,
-                    suit_count INT NOT NULL,
-                    result VARCHAR(20) NOT NULL,
-                    score INT NOT NULL,
-                    moves INT NOT NULL,
-                    duration_seconds INT NOT NULL,
-                    created_at VARCHAR(60) NOT NULL,
-                    CONSTRAINT fk_games_users
-                        FOREIGN KEY (user_id)
-                        REFERENCES users(id)
-                        ON DELETE CASCADE
-                ) ENGINE=InnoDB;
-                """
-            )
-            conn.commit()
+        try:
+            with self._connect() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(
+                        """
+                        CREATE TABLE IF NOT EXISTS users (
+                            id INTEGER PRIMARY KEY,
+                            name VARCHAR(120) NOT NULL,
+                            email VARCHAR(180) NOT NULL UNIQUE,
+                            password VARCHAR(255) NOT NULL,
+                            role VARCHAR(20) NOT NULL,
+                            xp INTEGER NOT NULL DEFAULT 0,
+                            matches INTEGER NOT NULL DEFAULT 0
+                        );
+                        """
+                    )
+                    cursor.execute(
+                        """
+                        CREATE TABLE IF NOT EXISTS words (
+                            id SERIAL PRIMARY KEY,
+                            word VARCHAR(180) NOT NULL,
+                            theme VARCHAR(120) NOT NULL,
+                            difficulty INTEGER NOT NULL
+                        );
+                        """
+                    )
+                    cursor.execute(
+                        """
+                        CREATE TABLE IF NOT EXISTS games (
+                            id INTEGER PRIMARY KEY,
+                            user_id INTEGER NOT NULL,
+                            suit_count INTEGER NOT NULL,
+                            result VARCHAR(20) NOT NULL,
+                            score INTEGER NOT NULL,
+                            moves INTEGER NOT NULL,
+                            duration_seconds INTEGER NOT NULL,
+                            created_at VARCHAR(60) NOT NULL,
+                            CONSTRAINT fk_games_users
+                                FOREIGN KEY (user_id)
+                                REFERENCES users(id)
+                                ON DELETE CASCADE
+                        );
+                        """
+                    )
+        except PsycopgError as exc:
+            raise RepositoryError(str(exc)) from exc
 
     def read_bootstrap(self) -> dict[str, Any]:
-        with self._connect() as conn:
-            cursor = conn.cursor(dictionary=True)
-            cursor.execute("SELECT * FROM users ORDER BY id ASC")
-            users = cursor.fetchall()
+        try:
+            with self._connect() as conn:
+                with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                    cursor.execute("SELECT * FROM users ORDER BY id ASC")
+                    users = cursor.fetchall()
 
-            cursor.execute("SELECT word, theme, difficulty FROM words ORDER BY id ASC")
-            words_rows = cursor.fetchall()
+                    cursor.execute("SELECT word, theme, difficulty FROM words ORDER BY id ASC")
+                    words_rows = cursor.fetchall()
 
-            cursor.execute(
-                """
-                SELECT
-                    id,
-                    user_id,
-                    suit_count,
-                    result,
-                    score,
-                    moves,
-                    duration_seconds,
-                    created_at
-                FROM games
-                ORDER BY id ASC
-                """
-            )
-            games_rows = cursor.fetchall()
+                    cursor.execute(
+                        """
+                        SELECT
+                            id,
+                            user_id,
+                            suit_count,
+                            result,
+                            score,
+                            moves,
+                            duration_seconds,
+                            created_at
+                        FROM games
+                        ORDER BY id ASC
+                        """
+                    )
+                    games_rows = cursor.fetchall()
+        except PsycopgError as exc:
+            raise RepositoryError(str(exc)) from exc
 
         words = [
             {
@@ -145,63 +148,65 @@ class DataRepository:
         words = payload.get("words", [])
         games = payload.get("games", [])
 
-        with self._connect() as conn:
-            cursor = conn.cursor()
-            cursor.execute("DELETE FROM games")
-            cursor.execute("DELETE FROM words")
-            cursor.execute("DELETE FROM users")
+        try:
+            with self._connect() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute("DELETE FROM games")
+                    cursor.execute("DELETE FROM words")
+                    cursor.execute("DELETE FROM users")
 
-            for user in users:
-                cursor.execute(
-                    """
-                    INSERT INTO users (id, name, email, password, role, xp, matches)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
-                    """,
-                    (
-                        int(user.get("id", 0)),
-                        str(user.get("name", "")),
-                        str(user.get("email", "")),
-                        str(user.get("password", "")),
-                        str(user.get("role", "student")),
-                        int(user.get("xp", 0) or 0),
-                        int(user.get("matches", 0) or 0),
-                    ),
-                )
+                    for user in users:
+                        cursor.execute(
+                            """
+                            INSERT INTO users (id, name, email, password, role, xp, matches)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s)
+                            """,
+                            (
+                                int(user.get("id", 0)),
+                                str(user.get("name", "")),
+                                str(user.get("email", "")),
+                                str(user.get("password", "")),
+                                str(user.get("role", "student")),
+                                int(user.get("xp", 0) or 0),
+                                int(user.get("matches", 0) or 0),
+                            ),
+                        )
 
-            for word in words:
-                cursor.execute(
-                    "INSERT INTO words (word, theme, difficulty) VALUES (%s, %s, %s)",
-                    (
-                        str(word.get("word", "")),
-                        str(word.get("theme", "")),
-                        int(word.get("difficulty", 1) or 1),
-                    ),
-                )
+                    for word in words:
+                        cursor.execute(
+                            "INSERT INTO words (word, theme, difficulty) VALUES (%s, %s, %s)",
+                            (
+                                str(word.get("word", "")),
+                                str(word.get("theme", "")),
+                                int(word.get("difficulty", 1) or 1),
+                            ),
+                        )
 
-            for game in games:
-                cursor.execute(
-                    """
-                    INSERT INTO games (
-                        id,
-                        user_id,
-                        suit_count,
-                        result,
-                        score,
-                        moves,
-                        duration_seconds,
-                        created_at
-                    )
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                    """,
-                    (
-                        int(game.get("id", 0)),
-                        int(game.get("userId", 0)),
-                        int(game.get("suitCount", 1) or 1),
-                        str(game.get("result", "abandoned")),
-                        int(game.get("score", 0) or 0),
-                        int(game.get("moves", 0) or 0),
-                        int(game.get("durationSeconds", 0) or 0),
-                        str(game.get("createdAt", "")),
-                    ),
-                )
-            conn.commit()
+                    for game in games:
+                        cursor.execute(
+                            """
+                            INSERT INTO games (
+                                id,
+                                user_id,
+                                suit_count,
+                                result,
+                                score,
+                                moves,
+                                duration_seconds,
+                                created_at
+                            )
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                            """,
+                            (
+                                int(game.get("id", 0)),
+                                int(game.get("userId", 0)),
+                                int(game.get("suitCount", 1) or 1),
+                                str(game.get("result", "abandoned")),
+                                int(game.get("score", 0) or 0),
+                                int(game.get("moves", 0) or 0),
+                                int(game.get("durationSeconds", 0) or 0),
+                                str(game.get("createdAt", "")),
+                            ),
+                        )
+        except PsycopgError as exc:
+            raise RepositoryError(str(exc)) from exc

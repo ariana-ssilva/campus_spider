@@ -8,7 +8,7 @@ from typing import Any
 from urllib.parse import urlparse
 
 from backend.controllers.api_controller import ApiController
-from backend.models.repository import MySQLError
+from backend.models.repository import RepositoryError
 from backend.views.json_view import send_json
 
 
@@ -46,7 +46,7 @@ class AppHandler(SimpleHTTPRequestHandler):
             try:
                 payload = self._read_json_body()
                 result = self.controller.sync(payload)
-            except (json.JSONDecodeError, ValueError, MySQLError) as exc:
+            except (json.JSONDecodeError, ValueError, RepositoryError) as exc:
                 send_json(self, {"ok": False, "error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
                 return
 

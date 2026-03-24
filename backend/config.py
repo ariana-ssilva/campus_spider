@@ -30,9 +30,12 @@ _load_env_file()
 
 def get_db_config() -> dict[str, Any]:
     return {
-        "host": os.getenv("MYSQL_HOST", "127.0.0.1"),
-        "port": int(os.getenv("MYSQL_PORT", "3308")),
-        "user": os.getenv("MYSQL_USER", "root"),
-        "password": os.getenv("MYSQL_PASSWORD", ""),
-        "database": os.getenv("MYSQL_DATABASE", "campus_spider"),
+        "engine": "postgres",
+        "database_url": os.getenv("DATABASE_URL", "").strip(),
+        "host": os.getenv("PGHOST", "127.0.0.1"),
+        "port": int(os.getenv("PGPORT", "5432")),
+        "user": os.getenv("PGUSER", "postgres"),
+        "password": os.getenv("PGPASSWORD", "postgres"),
+        "database": os.getenv("PGDATABASE", "campus_spider"),
+        "sslmode": os.getenv("PGSSLMODE", "require"),
     }

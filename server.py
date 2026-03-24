@@ -22,9 +22,12 @@ def main() -> None:
 
     port = int(os.getenv("PORT", "8080"))
     server = ThreadingHTTPServer(("0.0.0.0", port), AppHandler)
+    db_target = db_config.get("database_url") or (
+        f"{db_config.get('user')}@{db_config.get('host')}:{db_config.get('port')}/{db_config.get('database')}"
+    )
     print(
         f"Servidor iniciado em http://0.0.0.0:{port} | "
-        f"MySQL: {db_config['user']}@{db_config['host']}:{db_config['port']}/{db_config['database']}"
+        f"Postgres: {db_target}"
     )
     server.serve_forever()
 
