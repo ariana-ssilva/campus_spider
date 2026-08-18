@@ -5,7 +5,6 @@ services:
     branch: main
     plan: free
     dockerfilePath: Dockerfile
-    startCommand: python server.py
     envVars:
       - key: DB_ENGINE
         value: postgres
