@@ -23,5 +23,10 @@
     "view": "profile",
     "icon": "◉",
     "label": "Perfil"
+  },
+  {
+    "view": "about",
+    "icon": "ⓘ",
+    "label": "Sobre"
   }
 ]

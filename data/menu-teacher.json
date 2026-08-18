@@ -23,5 +23,10 @@
     "view": "ranking",
     "icon": "🏆",
     "label": "Ranking"
+  },
+  {
+    "view": "about",
+    "icon": "ⓘ",
+    "label": "Sobre"
   }
 ]

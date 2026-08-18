@@ -72,7 +72,9 @@ const state = {
   gameConfig: {
     suitCount: null,
     suitTopics: []
-  }
+  },
+  pendingDelete: null,
+  showInstructionsOnLogin: false
 };
 
 const els = {
@@ -151,6 +153,12 @@ const els = {
   suitModalMessage: document.getElementById("suitModalMessage"),
   closeSuitModalBtn: document.getElementById("closeSuitModalBtn"),
   winModal: document.getElementById("winModal"),
+  instructionsModal: document.getElementById("instructionsModal"),
+  closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+  deleteModal: document.getElementById("deleteModal"),
+  deleteModalMessage: document.getElementById("deleteModalMessage"),
+  cancelDeleteBtn: document.getElementById("cancelDeleteBtn"),
+  confirmDeleteBtn: document.getElementById("confirmDeleteBtn"),
   winScoreValue: document.getElementById("winScoreValue"),
   winMovesValue: document.getElementById("winMovesValue"),
   winTimeValue: document.getElementById("winTimeValue"),
@@ -159,10 +167,12 @@ const els = {
   playAgainBtn: document.getElementById("playAgainBtn"),
   closeToHomeBtn: document.getElementById("closeToHomeBtn"),
   wordForm: document.getElementById("wordForm"),
+  wordIdInput: document.getElementById("wordIdInput"),
   wordInput: document.getElementById("wordInput"),
   themeInput: document.getElementById("themeInput"),
   difficultyInput: document.getElementById("difficultyInput"),
-  wordList: document.getElementById("wordList"),
+  wordCrudBody: document.getElementById("wordCrudBody"),
+  cancelWordEditBtn: document.getElementById("cancelWordEditBtn"),
   rankingBody: document.getElementById("rankingBody"),
   teacherMessage: document.getElementById("teacherMessage"),
   userForm: document.getElementById("userForm"),
@@ -199,8 +209,8 @@ async function loadMenuConfigs() {
   const result = { student: null, teacher: null };
   try {
     const [sRes, tRes] = await Promise.all([
-      fetch("/data/menu-student.json", { cache: "no-store" }),
-      fetch("/data/menu-teacher.json", { cache: "no-store" })
+      fetch("/data/menu-student.json", { cache: "force-cache" }),
+      fetch("/data/menu-teacher.json", { cache: "force-cache" })
     ]);
 
     if (sRes.ok) {
@@ -266,7 +276,9 @@ function bindEvents() {
   els.dealBtn.addEventListener("click", dealFromStock);
   els.undoBtn.addEventListener("click", undoLastAction);
   els.stockBtn.addEventListener("click", dealFromStock);
-  els.wordForm.addEventListener("submit", addWord);
+  els.wordForm.addEventListener("submit", saveWord);
+  els.cancelWordEditBtn?.addEventListener("click", resetWordForm);
+  els.wordCrudBody?.addEventListener("click", handleWordCrudAction);
   els.userForm?.addEventListener("submit", saveUser);
   els.cancelUserEditBtn?.addEventListener("click", resetUserForm);
   els.userCrudBody?.addEventListener("click", handleUserCrudAction);
@@ -276,6 +288,11 @@ function bindEvents() {
   els.playAgainBtn?.addEventListener("click", handlePlayAgain);
   els.closeToHomeBtn?.addEventListener("click", handleCloseToHome);
   els.closeSuitModalBtn?.addEventListener("click", closeSuitModal);
+  els.closeInstructionsBtn?.addEventListener("click", closeInstructionsModal);
+  document.querySelector("[data-close-instructions]")?.addEventListener("click", closeInstructionsModal);
+  els.cancelDeleteBtn?.addEventListener("click", closeDeleteModal);
+  els.confirmDeleteBtn?.addEventListener("click", confirmPendingDelete);
+  document.querySelector("[data-close-delete-modal]")?.addEventListener("click", closeDeleteModal);
   document.addEventListener("click", handleGlobalClick);
   els.topNavItems.forEach((item) => item.addEventListener("click", handleTopMenuClick));
   document.querySelectorAll(".suit-choice-btn").forEach((button) => {
@@ -296,6 +313,13 @@ function handleGlobalClick(event) {
   if (topNavItem && state.currentUser) {
     const view = topNavItem.dataset.view;
     if (!view) {
+      return;
+    }
+
+    if (view === "about") {
+      event.preventDefault();
+      setTopMenuActive(state.currentUser.role === "teacher" ? state.teacherView : state.studentView);
+      openInstructionsModal();
       return;
     }
 
@@ -350,6 +374,7 @@ function restoreSession() {
 
   const users = getUsers();
   const session = JSON.parse(sessionRaw);
+  state.showInstructionsOnLogin = session.showInstructions === true;
   const user = users.find((item) => item.id === session.userId);
 
   if (!user) {
@@ -431,8 +456,12 @@ function handleRegister(event) {
   users.push(newUser);
   setUsers(users);
 
-  localStorage.setItem(STORAGE_KEYS.session, JSON.stringify({ userId: newUser.id }));
+  localStorage.setItem(
+    STORAGE_KEYS.session,
+    JSON.stringify({ userId: newUser.id, showInstructions: true })
+  );
   state.currentUser = newUser;
+  state.showInstructionsOnLogin = true;
   setMessage(els.authMessage, "Conta criada com sucesso.");
   renderByRole();
 }
@@ -446,6 +475,8 @@ function logout() {
   state.gameStats = { moves: 0, roundScore: 0, elapsedSeconds: 0, invalidMoves: 0, timerId: null };
   closeSuitModal();
   closeWinModal();
+  closeInstructionsModal();
+  closeDeleteModal();
   exitGameFocusMode();
   showAuth();
 }
@@ -488,6 +519,10 @@ function renderByRole() {
 
   renderStudentInfo();
   setStudentView(state.studentView || "home");
+  if (state.showInstructionsOnLogin) {
+    state.showInstructionsOnLogin = false;
+    openInstructionsModal();
+  }
 }
 
 function showAuth() {
@@ -677,7 +712,8 @@ function configureTopMenuForTeacher() {
     { view: "words", icon: "◈", label: "Palavras" },
     { view: "users", icon: "◉", label: "Usuários" },
     { view: "games", icon: "▦", label: "Jogos" },
-    { view: "ranking", icon: "🏆", label: "Ranking" }
+    { view: "ranking", icon: "🏆", label: "Ranking" },
+    { view: "about", icon: "ⓘ", label: "Sobre" }
   ];
 
   els.topNavItems.forEach((item, index) => {
@@ -708,7 +744,8 @@ function configureTopMenuForStudent() {
     { view: "modules", icon: "▦", label: "Módulos" },
     { view: "challenges", icon: "◈", label: "Desafios" },
     { view: "ranking", icon: "🏆", label: "Ranking" },
-    { view: "profile", icon: "◉", label: "Perfil" }
+    { view: "profile", icon: "◉", label: "Perfil" },
+    { view: "about", icon: "ⓘ", label: "Sobre" }
   ];
 
   els.topNavItems.forEach((item, index) => {
@@ -1117,17 +1154,29 @@ function renderProfilePage() {
 }
 
 function renderWords() {
-  const words = getWords();
-  els.wordList.innerHTML = "";
+  if (!els.wordCrudBody) {
+    return;
+  }
 
-  words
-    .slice()
-    .sort((a, b) => b.difficulty - a.difficulty)
-    .forEach((item) => {
-      const li = document.createElement("li");
-      li.textContent = `${item.word} | ${item.theme} | dificuldade ${item.difficulty}`;
-      els.wordList.appendChild(li);
-    });
+  const words = getWords()
+    .map((word, index) => ({ word, id: Number(word.id) || index + 1 }))
+    .sort((a, b) => b.word.difficulty - a.word.difficulty);
+
+  els.wordCrudBody.innerHTML = words
+    .map(
+      ({ word, id }) => `
+        <tr>
+          <td>${word.word}</td>
+          <td>${word.theme}</td>
+          <td>${word.difficulty}</td>
+          <td class="action-cell">
+            <button type="button" class="btn-outline btn-mini" data-action="edit-word" data-id="${id}"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Editar</button>
+            <button type="button" class="btn-outline btn-mini danger" data-action="delete-word" data-id="${id}"><i class="fa-solid fa-trash" aria-hidden="true"></i> Excluir</button>
+          </td>
+        </tr>
+      `
+    )
+    .join("");
 }
 
 function renderRanking() {
@@ -1149,8 +1198,10 @@ function renderRanking() {
   });
 }
 
-function addWord(event) {
+function saveWord(event) {
   event.preventDefault();
+  const id = Number(els.wordIdInput.value);
+  const isEditing = Boolean(id);
   const word = els.wordInput.value.trim();
   const theme = els.themeInput.value.trim();
   const difficulty = Number(els.difficultyInput.value);
@@ -1161,12 +1212,69 @@ function addWord(event) {
   }
 
   const words = getWords();
-  words.push({ word, theme, difficulty });
+  if (isEditing) {
+    const index = words.findIndex((item, itemIndex) => (Number(item.id) || itemIndex + 1) === id);
+    if (index === -1) {
+      setMessage(els.teacherMessage, "Palavra nao encontrada.", true);
+      return;
+    }
+
+    words[index] = { ...words[index], id: words[index].id || id, word, theme, difficulty };
+  } else {
+    const nextId = words.reduce(
+      (max, item, itemIndex) => Math.max(max, Number(item.id) || itemIndex + 1),
+      0
+    ) + 1;
+    words.push({ id: nextId, word, theme, difficulty });
+  }
+
   setWords(words);
 
-  setMessage(els.teacherMessage, "Palavra adicionada com sucesso.");
+  setMessage(els.teacherMessage, isEditing ? "Palavra atualizada com sucesso." : "Palavra adicionada com sucesso.");
   renderWords();
+  resetWordForm();
+}
+
+function handleWordCrudAction(event) {
+  const button = event.target.closest("button[data-action]");
+  if (!button) {
+    return;
+  }
+
+  const action = button.dataset.action;
+  const id = Number(button.dataset.id);
+  const words = getWords();
+  const index = words.findIndex((item, itemIndex) => (Number(item.id) || itemIndex + 1) === id);
+  const selectedWord = index === -1 ? null : words[index];
+
+  if (!selectedWord) {
+    setMessage(els.teacherMessage, "Palavra nao encontrada.", true);
+    return;
+  }
+
+  if (action === "edit-word") {
+    els.wordIdInput.value = String(id);
+    els.wordInput.value = selectedWord.word || "";
+    els.themeInput.value = selectedWord.theme || "";
+    els.difficultyInput.value = String(selectedWord.difficulty || 1);
+    setMessage(els.teacherMessage, `Editando palavra: ${selectedWord.word}`);
+    return;
+  }
+
+  if (action === "delete-word") {
+    openDeleteModal("delete-word", id, `a palavra “${selectedWord.word}”`);
+  }
+}
+
+function resetWordForm() {
+  if (!els.wordForm) {
+    return;
+  }
+
   els.wordForm.reset();
+  if (els.wordIdInput) {
+    els.wordIdInput.value = "";
+  }
 }
 
 function renderUsersCrud() {
@@ -1185,8 +1293,8 @@ function renderUsersCrud() {
         <td>${user.xp || 0}</td>
         <td>${user.matches || 0}</td>
         <td class="action-cell">
-          <button type="button" class="btn-outline btn-mini" data-action="edit-user" data-id="${user.id}">Editar</button>
-          <button type="button" class="btn-outline btn-mini danger" data-action="delete-user" data-id="${user.id}">Excluir</button>
+          <button type="button" class="btn-outline btn-mini" data-action="edit-user" data-id="${user.id}"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Editar</button>
+          <button type="button" class="btn-outline btn-mini danger" data-action="delete-user" data-id="${user.id}"><i class="fa-solid fa-trash" aria-hidden="true"></i> Excluir</button>
         </td>
       </tr>
     `
@@ -1306,19 +1414,7 @@ function handleUserCrudAction(event) {
       return;
     }
 
-    const nextUsers = users.filter((item) => item.id !== user.id);
-    setUsers(nextUsers);
-
-    // Remove jogos vinculados ao usuario excluido para manter integridade dos dados.
-    const games = getGames().filter((game) => game.userId !== user.id);
-    setGames(games);
-
-    renderUsersCrud();
-    renderGamesCrud();
-    renderRanking();
-    populateGameUserOptions();
-    resetUserForm();
-    setMessage(els.teacherMessage, "Usuario excluido com sucesso.");
+    openDeleteModal("delete-user", id, `o usuário “${user.name}”`);
   }
 }
 
@@ -1363,8 +1459,8 @@ function renderGamesCrud() {
           <td>${formatDuration(game.durationSeconds)}</td>
           <td>${formatDateTime(game.createdAt)}</td>
           <td class="action-cell">
-            <button type="button" class="btn-outline btn-mini" data-action="edit-game" data-id="${game.id}">Editar</button>
-            <button type="button" class="btn-outline btn-mini danger" data-action="delete-game" data-id="${game.id}">Excluir</button>
+            <button type="button" class="btn-outline btn-mini" data-action="edit-game" data-id="${game.id}"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Editar</button>
+            <button type="button" class="btn-outline btn-mini danger" data-action="delete-game" data-id="${game.id}"><i class="fa-solid fa-trash" aria-hidden="true"></i> Excluir</button>
           </td>
         </tr>
       `;
@@ -1462,11 +1558,7 @@ function handleGameCrudAction(event) {
   }
 
   if (action === "delete-game") {
-    const nextGames = games.filter((item) => item.id !== game.id);
-    setGames(nextGames);
-    renderGamesCrud();
-    resetGameForm();
-    setMessage(els.teacherMessage, "Jogo excluido com sucesso.");
+    openDeleteModal("delete-game", id, `o jogo #${game.id}`);
   }
 }
 
@@ -1489,6 +1581,65 @@ function resetGameForm() {
   if (els.gameDurationInput) {
     els.gameDurationInput.value = "0";
   }
+}
+
+function openDeleteModal(action, id, label) {
+  state.pendingDelete = { action, id };
+  if (els.deleteModalMessage) {
+    els.deleteModalMessage.textContent = `Tem certeza que deseja excluir ${label}?`;
+  }
+  els.deleteModal?.classList.remove("hidden");
+}
+
+function closeDeleteModal() {
+  state.pendingDelete = null;
+  els.deleteModal?.classList.add("hidden");
+}
+
+function confirmPendingDelete() {
+  const pendingDelete = state.pendingDelete;
+  if (!pendingDelete) {
+    closeDeleteModal();
+    return;
+  }
+
+  if (pendingDelete.action === "delete-word") {
+    const words = getWords();
+    const index = words.findIndex(
+      (item, itemIndex) => (Number(item.id) || itemIndex + 1) === pendingDelete.id
+    );
+    if (index !== -1) {
+      setWords(words.filter((_, itemIndex) => itemIndex !== index));
+      renderWords();
+      resetWordForm();
+      setMessage(els.teacherMessage, "Palavra excluida com sucesso.");
+    }
+  }
+
+  if (pendingDelete.action === "delete-user") {
+    const users = getUsers();
+    const user = users.find((item) => item.id === pendingDelete.id);
+    if (user && state.currentUser?.id !== user.id) {
+      setUsers(users.filter((item) => item.id !== user.id));
+      setGames(getGames().filter((game) => game.userId !== user.id));
+      renderUsersCrud();
+      renderGamesCrud();
+      renderRanking();
+      populateGameUserOptions();
+      resetUserForm();
+      setMessage(els.teacherMessage, "Usuario excluido com sucesso.");
+    }
+  }
+
+  if (pendingDelete.action === "delete-game") {
+    const games = getGames();
+    setGames(games.filter((item) => item.id !== pendingDelete.id));
+    renderGamesCrud();
+    resetGameForm();
+    setMessage(els.teacherMessage, "Jogo excluido com sucesso.");
+  }
+
+  closeDeleteModal();
 }
 
 function populateGameUserOptions() {
@@ -1700,6 +1851,28 @@ function openWinModal() {
 
 function closeWinModal() {
   els.winModal?.classList.add("hidden");
+}
+
+function openInstructionsModal() {
+  setTopMenuActive(state.currentUser?.role === "teacher" ? state.teacherView : state.studentView);
+  els.instructionsModal?.classList.remove("hidden");
+}
+
+function closeInstructionsModal() {
+  els.instructionsModal?.classList.add("hidden");
+  const currentView = state.currentUser?.role === "teacher" ? state.teacherView : state.studentView;
+  setTopMenuActive(currentView);
+  if (state.currentUser?.role === "teacher") {
+    setTeacherView(currentView);
+  } else if (state.currentUser?.role === "student") {
+    setStudentView(currentView);
+  }
+  if (state.currentUser) {
+    localStorage.setItem(
+      STORAGE_KEYS.session,
+      JSON.stringify({ userId: state.currentUser.id, showInstructions: false })
+    );
+  }
 }
 
 function handlePlayAgain() {

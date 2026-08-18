@@ -368,8 +368,17 @@ body.game-focus .card {
 body.auth-view main {
   max-width: none;
   width: 100%;
+  height: 100vh;
+  min-height: 100vh;
   padding: 0;
   margin: 0;
+}
+
+body.auth-view #authSection,
+body.auth-view .auth-panel,
+body.auth-view .auth-split {
+  height: 100%;
+  min-height: 100vh;
 }
 
 .student-layout {
@@ -669,6 +678,7 @@ body.auth-view main {
 .auth-split {
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
+  height: 100%;
   min-height: 100vh;
   border-radius: 0;
   overflow: hidden;
@@ -692,6 +702,44 @@ body.auth-view main {
   background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.16), transparent 30%),
     radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.08), transparent 25%);
   pointer-events: none;
+}
+
+.app-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, #eef4ff 0%, #f8fafc 55%, #e8f7f1 100%);
+  color: #1e3a8a;
+  font-family: var(--font-title);
+  font-weight: 700;
+}
+
+.app-loading-mark {
+  width: 3rem;
+  height: 3rem;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 12px 26px rgba(37, 99, 235, 0.22);
+  animation: loading-pulse 1.1s ease-in-out infinite alternate;
+}
+
+@keyframes loading-pulse {
+  from {
+    transform: translateY(0);
+    opacity: 0.75;
+  }
+
+  to {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
 }
 
 .auth-brand-visual,
@@ -948,6 +996,10 @@ button {
   padding: 0.82rem 1rem;
   border-radius: 12px;
   font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
   transition: filter 0.15s ease, transform 0.15s ease, box-shadow 0.2s ease;
 }
 
@@ -1558,12 +1610,16 @@ button {
 }
 
 .btn-outline.danger {
-  border-color: #fca5a5;
-  color: #b91c1c;
+  border-color: #fda4af;
+  color: #be123c;
+  background: #fff1f2;
+  box-shadow: 0 6px 12px rgba(190, 18, 60, 0.1);
 }
 
 .btn-outline.danger:hover {
-  background: #fee2e2;
+  background: #ffe4e6;
+  border-color: #fb7185;
+  color: #9f1239;
 }
 
 .word-list {
@@ -1777,9 +1833,13 @@ button {
   background: #f8fafc;
   color: #1e293b;
   border-radius: 8px;
-  padding: 0.35rem 0.6rem;
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0;
   font-weight: 700;
   cursor: pointer;
+  display: inline-grid;
+  place-items: center;
 }
 
 .modal-close-btn:hover {
@@ -1834,6 +1894,41 @@ button {
   width: 100%;
 }
 
+.delete-modal-card {
+  border-top: 4px solid #e11d48;
+}
+
+.delete-modal-card h3 {
+  color: #9f1239;
+}
+
+.delete-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 1.2rem;
+}
+
+.delete-modal-actions .btn-outline {
+  width: auto;
+}
+
+.instructions-card {
+  max-width: 620px;
+}
+
+.instructions-list {
+  margin: 0.8rem 0 1.1rem;
+  padding-left: 1.4rem;
+  display: grid;
+  gap: 0.55rem;
+  color: #334155;
+}
+
+.instructions-understood-btn {
+  width: 100%;
+}
+
 .hidden {
   display: none !important;
 }
@@ -1852,6 +1947,7 @@ button {
 @media (max-width: 900px) {
   .top-nav {
     display: none;
+  }
 
     .teacher-home-grid,
     .module-overview-grid {
@@ -1943,3 +2039,4 @@ button {
         width: 100%;
       }
     }
+  }

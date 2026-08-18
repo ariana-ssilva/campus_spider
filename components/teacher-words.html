@@ -1,8 +1,9 @@
 <div class="teacher-panel-section hidden" data-teacher-view="words">
   <div class="teacher-grid">
-    <div class="teacher-box">
-      <h3>Adicionar palavra</h3>
+    <div class="teacher-box teacher-box-wide">
+      <h3>CRUD de palavras</h3>
       <form id="wordForm" class="form-grid">
+        <input type="hidden" id="wordIdInput" />
         <label>
           Palavra
           <input type="text" id="wordInput" required />
@@ -15,13 +16,25 @@
           Dificuldade (1-13)
           <input type="number" id="difficultyInput" min="1" max="13" required />
         </label>
-        <button type="submit" class="btn-primary">Salvar palavra</button>
+        <div class="teacher-form-actions">
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Salvar palavra</button>
+          <button type="button" id="cancelWordEditBtn" class="btn-outline"><i class="fa-solid fa-xmark" aria-hidden="true"></i> Cancelar edição</button>
+        </div>
       </form>
-    </div>
 
-    <div class="teacher-box">
-      <h3>Banco de palavras</h3>
-      <ul id="wordList" class="word-list"></ul>
+      <div class="table-wrap">
+        <table class="ranking-table">
+          <thead>
+            <tr>
+              <th>Palavra</th>
+              <th>Tema</th>
+              <th>Dificuldade</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="wordCrudBody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>

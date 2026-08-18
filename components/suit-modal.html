@@ -2,7 +2,7 @@
   <div class="modal-card">
     <div class="modal-header">
       <h3 id="suitModalTitle">Escolha os naipes (assuntos)</h3>
-      <button id="closeSuitModalBtn" class="modal-close-btn" type="button" aria-label="Fechar escolha de naipes">Fechar</button>
+      <button id="closeSuitModalBtn" class="modal-close-btn" type="button" aria-label="Fechar escolha de naipes" title="Fechar"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
     </div>
     <p>
       Defina a dificuldade estilo Spider:
@@ -14,6 +14,40 @@
       <button class="btn-primary suit-choice-btn" data-suits="4">4 Naipes</button>
     </div>
     <p id="suitModalMessage" class="message"></p>
+  </div>
+</div>
+
+<div id="instructionsModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="instructionsModalTitle">
+  <div class="modal-card instructions-card">
+    <div class="modal-header">
+      <h3 id="instructionsModalTitle"><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Como jogar</h3>
+      <button id="closeInstructionsBtn" class="modal-close-btn" type="button" aria-label="Fechar instruções" title="Fechar"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <p>O SpiderEDU combina o jogo Spider com palavras e temas de estudo.</p>
+    <ol class="instructions-list">
+      <li>Escolha a quantidade de naipes para definir a dificuldade.</li>
+      <li>Organize as cartas em ordem decrescente, do 13 ao Ás.</li>
+      <li>Você pode mover uma sequência quando as cartas forem do mesmo naipe.</li>
+      <li>Use a pilha para distribuir novas cartas e o desfazer quando precisar.</li>
+      <li>Complete as sequências para vencer e ganhar XP.</li>
+    </ol>
+    <button class="btn-primary instructions-understood-btn" type="button" data-close-instructions>
+      <i class="fa-solid fa-check" aria-hidden="true"></i> Entendi
+    </button>
+  </div>
+</div>
+
+<div id="deleteModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+  <div class="modal-card delete-modal-card">
+    <div class="modal-header">
+      <h3 id="deleteModalTitle"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Confirmar exclusão</h3>
+      <button id="cancelDeleteBtn" class="modal-close-btn" type="button" aria-label="Fechar confirmação de exclusão" title="Fechar"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <p id="deleteModalMessage">Tem certeza que deseja excluir este registro?</p>
+    <div class="delete-modal-actions">
+      <button id="confirmDeleteBtn" class="btn-outline danger" type="button"><i class="fa-solid fa-trash" aria-hidden="true"></i> Excluir</button>
+      <button class="btn-outline" type="button" data-close-delete-modal>Cancelar</button>
+    </div>
   </div>
 </div>
 
@@ -30,7 +64,7 @@
     </div>
     <div class="congrats-actions">
       <button id="playAgainBtn" class="btn-primary">Jogar novamente</button>
-      <button id="closeToHomeBtn" class="btn-outline">Fechar</button>
+      <button id="closeToHomeBtn" class="btn-outline" title="Fechar" aria-label="Fechar e voltar ao início"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
     </div>
   </div>
 </div>

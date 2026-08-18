@@ -21,7 +21,7 @@ async function loadPartials() {
       throw new Error(`Container ausente: ${target}`);
     }
 
-    const response = await fetch(file, { cache: "no-store" });
+    const response = await fetch(file, { cache: "force-cache" });
     if (!response.ok) {
       throw new Error(`Falha ao carregar ${file}`);
     }
@@ -41,7 +41,7 @@ async function loadPartials() {
 function loadAppScript() {
   return new Promise((resolve, reject) => {
     const script = document.createElement("script");
-    script.src = `app.js?v=${Date.now()}`;
+    script.src = "app.js?v=4";
     script.async = false;
     script.onload = () => resolve();
     script.onerror = () => reject(new Error("Falha ao carregar app.js"));
@@ -57,8 +57,11 @@ async function bootstrap() {
     if (typeof window.initializeSpiderEduApp === "function") {
       window.initializeSpiderEduApp();
     }
+
+    document.getElementById("appLoading")?.classList.add("hidden");
   } catch (error) {
     console.error(error);
+    document.getElementById("appLoading")?.classList.add("hidden");
     const fallback = document.createElement("p");
     fallback.textContent = "Erro ao montar a interface. Recarregue a pagina.";
     fallback.style.color = "#ef4444";
