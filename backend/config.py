@@ -31,8 +31,12 @@ _load_env_file()
 def get_db_config() -> dict[str, Any]:
     db_url = os.getenv("DATABASE_URL", "").strip()
     db_url_external = os.getenv("DATABASE_URL_EXTERNAL", "").strip()
+    engine = os.getenv("DB_ENGINE", "").strip().lower()
+    if not engine:
+        engine = "postgres" if db_url else "mysql"
+
     return {
-        "engine": os.getenv("DB_ENGINE", "mysql"),
+        "engine": engine,
         "database_url": db_url,
         "database_url_external": db_url_external,
         "host": os.getenv("DB_HOST", "127.0.0.1"),
