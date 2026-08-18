@@ -1,0 +1,27 @@
+<div class="teacher-panel-section hidden" data-teacher-view="words">
+  <div class="teacher-grid">
+    <div class="teacher-box">
+      <h3>Adicionar palavra</h3>
+      <form id="wordForm" class="form-grid">
+        <label>
+          Palavra
+          <input type="text" id="wordInput" required />
+        </label>
+        <label>
+          Tema
+          <input type="text" id="themeInput" required />
+        </label>
+        <label>
+          Dificuldade (1-13)
+          <input type="number" id="difficultyInput" min="1" max="13" required />
+        </label>
+        <button type="submit" class="btn-primary">Salvar palavra</button>
+      </form>
+    </div>
+
+    <div class="teacher-box">
+      <h3>Banco de palavras</h3>
+      <ul id="wordList" class="word-list"></ul>
+    </div>
+  </div>
+</div>

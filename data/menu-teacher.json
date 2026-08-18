@@ -1,0 +1,27 @@
+[
+  {
+    "view": "home",
+    "icon": "⌂",
+    "label": "Início"
+  },
+  {
+    "view": "words",
+    "icon": "◈",
+    "label": "Palavras"
+  },
+  {
+    "view": "users",
+    "icon": "◉",
+    "label": "Usuários"
+  },
+  {
+    "view": "games",
+    "icon": "▦",
+    "label": "Jogos"
+  },
+  {
+    "view": "ranking",
+    "icon": "🏆",
+    "label": "Ranking"
+  }
+]

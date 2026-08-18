@@ -15,7 +15,27 @@
   <body>
     <div class="bg-layer"></div>
     <div id="headerSlot"></div>
-    <main id="mainSlot"></main>
+    <main>
+      <div id="authSlot"></div>
+
+      <!-- Student views -->
+      <section id="studentSection" class="hidden">
+        <div id="studentHomeSlot"></div>
+        <div id="studentModulesSlot"></div>
+        <div id="studentChallengesSlot"></div>
+        <div id="studentRankingSlot"></div>
+        <div id="studentProfileSlot"></div>
+      </section>
+
+      <!-- Teacher views -->
+      <section id="teacherSection" class="panel hidden">
+        <div id="teacherHomeSlot"></div>
+        <div id="teacherWordsSlot"></div>
+        <div id="teacherUsersSlot"></div>
+        <div id="teacherGamesSlot"></div>
+        <div id="teacherRankingSlot"></div>
+      </section>
+    </main>
     <div id="modalSlot"></div>
 
     <script type="module" src="layout.js"></script>

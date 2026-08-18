@@ -30,16 +30,15 @@ _load_env_file()
 
 def get_db_config() -> dict[str, Any]:
     db_url = os.getenv("DATABASE_URL", "").strip()
-    print(f"[DEBUG-CONFIG] DATABASE_URL env present: {bool(db_url)}")
-    if db_url:
-        print(f"[DEBUG-CONFIG] DATABASE_URL (first 60 chars): {db_url[:60]}")
+    db_url_external = os.getenv("DATABASE_URL_EXTERNAL", "").strip()
     return {
-        "engine": "postgres",
+        "engine": os.getenv("DB_ENGINE", "mysql"),
         "database_url": db_url,
-        "host": os.getenv("PGHOST", "127.0.0.1"),
-        "port": int(os.getenv("PGPORT", "5432")),
-        "user": os.getenv("PGUSER", "postgres"),
-        "password": os.getenv("PGPASSWORD", "postgres"),
-        "database": os.getenv("PGDATABASE", "campus_spider"),
-        "sslmode": os.getenv("PGSSLMODE", "disable"),
+        "database_url_external": db_url_external,
+        "host": os.getenv("DB_HOST", "127.0.0.1"),
+        "port": int(os.getenv("DB_PORT", "3308")),
+        "user": os.getenv("DB_USER", "root"),
+        "password": os.getenv("DB_PASSWORD", "123456"),
+        "database": os.getenv("DB_NAME", "campus_spider"),
+        "sslmode": os.getenv("DB_SSLMODE", "prefer"),
     }

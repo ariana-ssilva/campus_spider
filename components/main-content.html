@@ -63,14 +63,14 @@
           <a href="#" role="button">Esqueceu a senha?</a>
         </div>
 
-        <details class="demo-users">
-          <summary>Contas de teste</summary>
-          <ul>
-            <li>Professor: prof@campus.com / 123456</li>
-            <li>Aluno 1: aluno1@campus.com / 123456</li>
-            <li>Aluno 2: aluno2@campus.com / 123456</li>
-          </ul>
-        </details>
+          <!-- <details class="demo-users">
+            <summary>Contas de teste</summary>
+            <ul>
+              <li>Professor: prof@campus.com / 123456</li>
+              <li>Aluno 1: aluno1@campus.com / 123456</li>
+              <li>Aluno 2: aluno2@campus.com / 123456</li>
+            </ul>
+          </details> -->
         <p id="authMessage" class="message"></p>
       </div>
     </div>
@@ -78,109 +78,269 @@
 </section>
 
 <section id="studentSection" class="hidden">
-  <div class="student-layout">
-    <div class="main-column">
-      <div class="panel dashboard">
-        <div class="student-dashboard-header">
-          <h2>Painel do Aluno</h2>
-          <p id="studentWelcome"></p>
-        </div>
-        <div class="stats student-stats-row">
-          <div class="stat-card">
-            <span>XP</span>
-            <strong id="xpValue">0</strong>
-          </div>
-          <div class="stat-card">
-            <span>Nivel</span>
-            <strong id="levelValue">1</strong>
-          </div>
-          <div class="stat-card">
-            <span>Partidas</span>
-            <strong id="matchesValue">0</strong>
-          </div>
-          <div class="stat-card">
-            <span>Ultima Pontuacao</span>
-            <strong id="lastScoreValue">0</strong>
-          </div>
-          <div class="stat-card">
-            <span>Melhor Pontuacao</span>
-            <strong id="bestScoreValue">0</strong>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel game-controls">
-        <button id="newGameBtn" class="btn-primary">Novo jogo</button>
-        <button id="dealBtn" class="btn-outline">Distribuir pilha</button>
-        <button id="undoBtn" class="btn-outline">Desfazer</button>
-        <p id="gameMessage" class="message"></p>
-      </div>
-
-      <section class="game-board-wrap">
-        <div class="board-metrics">
-          <span class="metric-chip">Tempo: <strong id="metricTime" class="metric-value">00:00</strong></span>
-          <span class="metric-chip">Movimentos: <strong id="metricMoves" class="metric-value">0</strong></span>
-          <span class="metric-chip">Pontuacao: <strong id="metricScore" class="metric-value">0</strong></span>
-        </div>
-
-        <div class="board-topbar">
-          <div class="completed-area">
-            <div class="completed-header">
-              <h3>Sequencias concluidas</h3>
-              <span id="completedCount">0/8</span>
+  <div class="student-pages">
+    <section class="student-view" data-student-view="home">
+      <div class="student-layout">
+        <div class="main-column">
+          <div class="panel dashboard">
+            <div class="student-dashboard-header">
+              <h2>Painel do Aluno</h2>
+              <p id="studentWelcome"></p>
             </div>
-            <div id="completedBoard" class="completed-board"></div>
+              <div class="stats student-stats-row">
+              <div class="stat-card">
+                <span>XP</span>
+                <strong id="xpValue">0</strong>
+              </div>
+              <div class="stat-card">
+                <span>Nível</span>
+                <strong id="levelValue">1</strong>
+              </div>
+              <div class="stat-card">
+                <span>Partidas</span>
+                <strong id="matchesValue">0</strong>
+              </div>
+              <div class="stat-card">
+                <span>Última Pontuação</span>
+                <strong id="lastScoreValue">0</strong>
+              </div>
+              <div class="stat-card">
+                <span>Melhor Pontuação</span>
+                <strong id="bestScoreValue">0</strong>
+              </div>
+            </div>
           </div>
-          <div class="stock-area">
-            <h3>Pilha restante</h3>
-            <button id="stockBtn" class="stock-btn" aria-label="Distribuir pilha restante">
-              <span id="stockCount" class="stock-count">0</span>
-            </button>
+
+          <div class="panel game-controls">
+            <button id="newGameBtn" class="btn-primary" type="button">Novo jogo</button>
+            <button id="dealBtn" class="btn-outline">Distribuir pilha</button>
+            <button id="undoBtn" class="btn-outline">Desfazer</button>
+            <p id="gameMessage" class="message"></p>
+          </div>
+
+          <section class="game-board-wrap">
+            <div class="board-metrics">
+              <span class="metric-chip">Tempo: <strong id="metricTime" class="metric-value">00:00</strong></span>
+              <span class="metric-chip">Movimentos: <strong id="metricMoves" class="metric-value">0</strong></span>
+              <span class="metric-chip">Pontuação: <strong id="metricScore" class="metric-value">0</strong></span>
+            </div>
+
+            <div class="board-topbar">
+              <div class="completed-area">
+                <div class="completed-header">
+                  <h3>Sequências concluídas</h3>
+                  <span id="completedCount">0/8</span>
+                </div>
+                <div id="completedBoard" class="completed-board"></div>
+              </div>
+              <div class="stock-area">
+                <h3>Pilha restante</h3>
+                <button id="stockBtn" class="stock-btn" aria-label="Distribuir pilha restante" type="button">
+                  <span id="stockCount" class="stock-count">0</span>
+                </button>
+              </div>
+            </div>
+            <div id="board" class="board"></div>
+          </section>
+        </div>
+
+        <aside class="side-column">
+          <div class="panel side-card">
+            <h3>Desafio Atual</h3>
+            <p id="challengeTheme" class="side-title">-</p>
+            <p id="challengeObjective">-</p>
+          </div>
+
+          <div class="panel side-card">
+            <h3>Ranking</h3>
+            <div id="studentRanking"></div>
+          </div>
+
+          <div class="panel side-card">
+            <h3>Progresso do Aluno</h3>
+            <div class="progress-grid">
+              <p>Acertos: <strong id="progressAccuracy">0%</strong></p>
+              <p>Desafios: <strong id="progressChallenges">0/8</strong></p>
+              <p>Medalhas: <strong id="progressMedals">0</strong></p>
+            </div>
+            <div class="xp-track">
+              <div id="progressXpBar" class="xp-fill"></div>
+            </div>
+            <p class="xp-caption"><strong id="progressXpCurrent">0</strong> / <span id="progressXpTarget">150</span> XP</p>
+          </div>
+
+          <div class="panel side-card">
+            <h3>Sequência</h3>
+            <p id="streakInfo">0 vitórias</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="student-view hidden" data-student-view="modules">
+      <div class="panel view-panel">
+        <div class="view-head">
+          <div>
+            <p class="eyebrow">Menu do aluno</p>
+            <h2>Módulos de estudo</h2>
+            <p>Veja os temas disponíveis e a distribuição do banco de palavras.</p>
+          </div>
+          <div class="view-head-actions">
+            <button type="button" class="btn-primary" data-action="start-game">Iniciar desafio</button>
+            <button type="button" class="btn-outline" data-target-view="home">Voltar ao início</button>
           </div>
         </div>
-        <div id="board" class="board"></div>
-      </section>
-    </div>
-
-    <aside class="side-column">
-      <div class="panel side-card">
-        <h3>Desafio Atual</h3>
-        <p id="challengeTheme" class="side-title">-</p>
-        <p id="challengeObjective">-</p>
-      </div>
-
-      <div class="panel side-card">
-        <h3>Ranking</h3>
-        <div id="studentRanking"></div>
-      </div>
-
-      <div class="panel side-card">
-        <h3>Progresso do Aluno</h3>
-        <div class="progress-grid">
-          <p>Acertos: <strong id="progressAccuracy">0%</strong></p>
-          <p>Desafios: <strong id="progressChallenges">0/8</strong></p>
-          <p>Medalhas: <strong id="progressMedals">0</strong></p>
+        <div class="module-overview-grid">
+          <div class="mini-stats-grid" id="homeHighlights"></div>
+          <article class="info-card">
+            <h3>Recomendação do momento</h3>
+            <p id="homeRecommendedTheme">-</p>
+            <p id="homeRecommendedAction" class="stacked-text">-</p>
+          </article>
+          <article class="info-card">
+            <h3>Temas disponíveis</h3>
+            <ul id="homeThemeList" class="bullet-list"></ul>
+          </article>
         </div>
-        <div class="xp-track">
-          <div id="progressXpBar" class="xp-fill"></div>
-        </div>
-        <p class="xp-caption"><strong id="progressXpCurrent">0</strong> / <span id="progressXpTarget">150</span> XP</p>
+        <div class="module-grid" id="moduleGrid"></div>
       </div>
+    </section>
 
-      <div class="panel side-card">
-        <h3>Sequencia</h3>
-        <p id="streakInfo">0 vitorias</p>
+    <section class="student-view hidden" data-student-view="challenges">
+      <div class="panel view-panel">
+        <div class="view-head">
+          <div>
+            <p class="eyebrow">Menu do aluno</p>
+            <h2>Desafios ativos</h2>
+            <p>Acompanhe a meta atual, a precisão e o andamento da partida.</p>
+          </div>
+          <div class="view-head-actions">
+            <button type="button" class="btn-primary" data-action="start-game">Novo jogo</button>
+            <button type="button" class="btn-outline" data-target-view="home">Voltar ao início</button>
+          </div>
+        </div>
+        <div class="challenge-grid">
+          <article class="info-card">
+            <h3>Objetivo atual</h3>
+            <p id="challengePageObjective">-</p>
+          </article>
+          <article class="info-card">
+            <h3>Resumo da partida</h3>
+            <div id="challengeProgressSummary" class="stacked-text"></div>
+          </article>
+          <article class="info-card">
+            <h3>Sequências completas</h3>
+            <ul id="challengeRunList" class="bullet-list"></ul>
+          </article>
+        </div>
       </div>
-    </aside>
+    </section>
+
+    <section class="student-view hidden" data-student-view="ranking">
+      <div class="panel view-panel">
+        <div class="view-head">
+          <div>
+            <p class="eyebrow">Menu do aluno</p>
+            <h2>Ranking de alunos</h2>
+            <p id="studentRankingSummary">-</p>
+          </div>
+          <div class="view-head-actions">
+            <button type="button" class="btn-primary" data-action="start-game">Jogar agora</button>
+            <button type="button" class="btn-outline" data-target-view="profile">Ver perfil</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="ranking-table">
+            <thead>
+              <tr>
+                <th>Pos.</th>
+                <th>Nome</th>
+                <th>XP</th>
+                <th>Nível</th>
+                <th>Partidas</th>
+              </tr>
+            </thead>
+            <tbody id="studentRankingTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="student-view hidden" data-student-view="profile">
+      <div class="panel view-panel">
+        <div class="view-head">
+          <div>
+            <p class="eyebrow">Menu do aluno</p>
+            <h2>Perfil do aluno</h2>
+            <p>Veja seu progresso, nível e pontuações pessoais.</p>
+          </div>
+          <div class="view-head-actions">
+            <button type="button" class="btn-primary" data-action="start-game">Continuar jogando</button>
+            <button type="button" class="btn-outline" data-target-view="ranking">Ver ranking</button>
+          </div>
+        </div>
+        <div class="profile-grid">
+          <article class="profile-card profile-card-hero">
+            <p class="eyebrow">Usuário atual</p>
+            <h3 id="profileName">-</h3>
+            <p id="profileEmail">-</p>
+            <p id="profileRole">-</p>
+          </article>
+          <article class="profile-card">
+            <span>XP</span>
+            <strong id="profileXp">0</strong>
+          </article>
+          <article class="profile-card">
+            <span>Nível</span>
+            <strong id="profileLevel">1</strong>
+          </article>
+          <article class="profile-card">
+            <span>Partidas</span>
+            <strong id="profileMatches">0</strong>
+          </article>
+          <article class="profile-card">
+            <span>Última pontuação</span>
+            <strong id="profileLastScore">0</strong>
+          </article>
+          <article class="profile-card">
+            <span>Melhor pontuação</span>
+            <strong id="profileBestScore">0</strong>
+          </article>
+        </div>
+      </div>
+    </section>
   </div>
 </section>
 
 <section id="teacherSection" class="panel hidden">
-  <h2>Painel do Professor</h2>
-  <p>Gerencie palavras do jogo e acompanhe desempenho dos alunos.</p>
+  <div class="teacher-pages">
+    <div class="teacher-panel-section" data-teacher-view="home">
+      <div class="view-head">
+        <div>
+          <p class="eyebrow">Menu do professor</p>
+          <h2>Painel do professor</h2>
+          <p>Resumo geral da turma, conteúdo e partidas registradas.</p>
+        </div>
+        <div class="view-head-actions">
+          <button type="button" class="btn-primary" data-target-view="words">Gerenciar palavras</button>
+          <button type="button" class="btn-outline" data-target-view="users">Gerenciar usuários</button>
+        </div>
+      </div>
 
-  <div class="teacher-content">
-    <div class="teacher-panel-section" data-teacher-view="words">
+      <div class="mini-stats-grid" id="teacherHomeStats"></div>
+      <div class="teacher-home-grid">
+        <article class="teacher-home-card">
+          <h3>Destaque da turma</h3>
+          <div id="teacherHomeSpotlight" class="stacked-text"></div>
+        </article>
+        <article class="teacher-home-card">
+          <h3>Partidas recentes</h3>
+          <ul id="teacherHomeRecentGames" class="bullet-list"></ul>
+        </article>
+      </div>
+    </div>
+
+    <div class="teacher-panel-section hidden" data-teacher-view="words">
       <div class="teacher-grid">
         <div class="teacher-box">
           <h3>Adicionar palavra</h3>
@@ -210,8 +370,8 @@
 
     <div class="teacher-panel-section hidden" data-teacher-view="users">
       <div class="teacher-grid">
-        <div class="teacher-box teacher-box-wide">
-          <h3>CRUD de usuarios</h3>
+          <div class="teacher-box teacher-box-wide">
+          <h3>CRUD de usuários</h3>
           <form id="userForm" class="form-grid teacher-form-grid">
             <input type="hidden" id="userIdInput" />
             <label>

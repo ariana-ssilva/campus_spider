@@ -29,16 +29,16 @@ const DEFAULT_USERS = [
 
 const DEFAULT_WORDS = [
   { word: "Pesquisa", theme: "Metodologia", difficulty: 1 },
-  { word: "Resumo", theme: "Academico", difficulty: 2 },
+  { word: "Resumo", theme: "Acadêmico", difficulty: 2 },
   { word: "Leitura", theme: "Linguagens", difficulty: 3 },
-  { word: "Ciencia", theme: "Geral", difficulty: 4 },
+  { word: "Ciência", theme: "Geral", difficulty: 4 },
   { word: "Projeto", theme: "Engenharia", difficulty: 5 },
-  { word: "Laboratorio", theme: "Pratica", difficulty: 6 },
-  { word: "Hipotese", theme: "Metodologia", difficulty: 7 },
-  { word: "Analise", theme: "Dados", difficulty: 8 },
-  { word: "Teorema", theme: "Matematica", difficulty: 9 },
-  { word: "Seminario", theme: "Comunicacao", difficulty: 10 },
-  { word: "Dissertacao", theme: "Academico", difficulty: 11 },
+  { word: "Laboratório", theme: "Prática", difficulty: 6 },
+  { word: "Hipótese", theme: "Metodologia", difficulty: 7 },
+  { word: "Análise", theme: "Dados", difficulty: 8 },
+  { word: "Teorema", theme: "Matemática", difficulty: 9 },
+  { word: "Seminário", theme: "Comunicação", difficulty: 10 },
+  { word: "Dissertação", theme: "Acadêmico", difficulty: 11 },
   { word: "Epistemologia", theme: "Filosofia", difficulty: 12 },
   { word: "Interdisciplinar", theme: "Geral", difficulty: 13 }
 ];
@@ -55,7 +55,8 @@ const SUITS = [
 const state = {
   currentUser: null,
   authMode: "login",
-  teacherView: "words",
+  teacherView: "home",
+  studentView: "home",
   selectedCard: null,
   board: Array.from({ length: 10 }, () => []),
   stock: [],
@@ -111,9 +112,27 @@ const els = {
   metricTime: document.getElementById("metricTime"),
   metricMoves: document.getElementById("metricMoves"),
   metricScore: document.getElementById("metricScore"),
+  homeHighlights: document.getElementById("homeHighlights"),
+  homeRecommendedTheme: document.getElementById("homeRecommendedTheme"),
+  homeRecommendedAction: document.getElementById("homeRecommendedAction"),
+  homeThemeList: document.getElementById("homeThemeList"),
+  moduleGrid: document.getElementById("moduleGrid"),
   challengeTheme: document.getElementById("challengeTheme"),
   challengeObjective: document.getElementById("challengeObjective"),
+  challengePageObjective: document.getElementById("challengePageObjective"),
+  challengeProgressSummary: document.getElementById("challengeProgressSummary"),
+  challengeRunList: document.getElementById("challengeRunList"),
   studentRanking: document.getElementById("studentRanking"),
+  studentRankingSummary: document.getElementById("studentRankingSummary"),
+  studentRankingTableBody: document.getElementById("studentRankingTableBody"),
+  profileName: document.getElementById("profileName"),
+  profileEmail: document.getElementById("profileEmail"),
+  profileRole: document.getElementById("profileRole"),
+  profileXp: document.getElementById("profileXp"),
+  profileLevel: document.getElementById("profileLevel"),
+  profileMatches: document.getElementById("profileMatches"),
+  profileLastScore: document.getElementById("profileLastScore"),
+  profileBestScore: document.getElementById("profileBestScore"),
   progressAccuracy: document.getElementById("progressAccuracy"),
   progressChallenges: document.getElementById("progressChallenges"),
   progressMedals: document.getElementById("progressMedals"),
@@ -166,18 +185,45 @@ const els = {
   gameDurationInput: document.getElementById("gameDurationInput"),
   cancelGameEditBtn: document.getElementById("cancelGameEditBtn"),
   gameCrudBody: document.getElementById("gameCrudBody"),
+  teacherHomeStats: document.getElementById("teacherHomeStats"),
+  teacherHomeSpotlight: document.getElementById("teacherHomeSpotlight"),
+  teacherHomeRecentGames: document.getElementById("teacherHomeRecentGames"),
   topNavItems: Array.from(document.querySelectorAll(".top-nav li")),
+  studentViews: Array.from(document.querySelectorAll("[data-student-view]")),
   teacherPanels: Array.from(document.querySelectorAll("[data-teacher-view]"))
 };
 
 let appInitialized = false;
 
-function init() {
+async function loadMenuConfigs() {
+  const result = { student: null, teacher: null };
+  try {
+    const [sRes, tRes] = await Promise.all([
+      fetch("/data/menu-student.json", { cache: "no-store" }),
+      fetch("/data/menu-teacher.json", { cache: "no-store" })
+    ]);
+
+    if (sRes.ok) {
+      result.student = await sRes.json();
+    }
+
+    if (tRes.ok) {
+      result.teacher = await tRes.json();
+    }
+  } catch (e) {
+    console.warn("Falha ao carregar configs de menu:", e);
+  }
+
+  state.menuConfigs = result;
+}
+
+async function init() {
   if (appInitialized) {
     return;
   }
 
   appInitialized = true;
+  await loadMenuConfigs();
   seedData();
   hydrateFromDatabase();
   syncAllToDatabase();
@@ -246,8 +292,52 @@ function handleGlobalClick(event) {
     return;
   }
 
+  const topNavItem = target.closest('.top-nav li[data-view]');
+  if (topNavItem && state.currentUser) {
+    const view = topNavItem.dataset.view;
+    if (!view) {
+      return;
+    }
+
+    if (state.currentUser.role === 'teacher') {
+      setTeacherView(view);
+      return;
+    }
+
+    setStudentView(view);
+    return;
+  }
+
   if (target.closest("#closeSuitModalBtn")) {
     closeSuitModal();
+    return;
+  }
+
+  const targetViewButton = target.closest("button[data-target-view]");
+  if (targetViewButton) {
+    const targetView = targetViewButton.dataset.targetView;
+    if (!targetView) {
+      return;
+    }
+
+    if (state.currentUser?.role === "teacher") {
+      setTeacherView(targetView);
+      return;
+    }
+
+    setStudentView(targetView);
+    return;
+  }
+
+  const actionButton = target.closest("button[data-action]");
+  if (actionButton?.dataset.action === "start-game") {
+    if (state.currentUser?.role === "student") {
+      setStudentView("home");
+      openSuitModal();
+      return;
+    }
+
+    startNewGame();
   }
 }
 
@@ -390,12 +480,20 @@ function renderByRole() {
   configureTopMenuForStudent();
   els.teacherSection.classList.add("hidden");
   els.studentSection.classList.remove("hidden");
+
+  if (!state.gameConfig.suitCount || !state.gameConfig.suitTopics.length) {
+    state.gameConfig.suitCount = 1;
+    state.gameConfig.suitTopics = buildSuitTopics(1);
+  }
+
   renderStudentInfo();
-  openSuitModal();
+  setStudentView(state.studentView || "home");
 }
 
 function showAuth() {
   exitGameFocusMode();
+  state.studentView = "home";
+  state.teacherView = "home";
   document.body.classList.add("auth-view");
   els.topbar?.classList.add("hidden");
   els.topbar?.classList.add("logged-out");
@@ -544,6 +642,7 @@ function renderStudentInfo() {
   }
   renderStudentSidebar();
   renderLiveMetrics();
+  renderStudentView(state.studentView || "home");
 }
 
 function renderTeacherArea() {
@@ -553,14 +652,14 @@ function renderTeacherArea() {
   renderGamesCrud();
   resetUserForm();
   resetGameForm();
-  setTeacherView(state.teacherView || "words");
+  setTeacherView(state.teacherView || "home");
 }
 
 function handleTopMenuClick(event) {
   const item = event.currentTarget;
 
   if (state.currentUser?.role !== "teacher") {
-    setTopMenuActive(item.dataset.view || "home");
+    setStudentView(item.dataset.view || "home");
     return;
   }
 
@@ -573,12 +672,12 @@ function handleTopMenuClick(event) {
 }
 
 function configureTopMenuForTeacher() {
-  const teacherItems = [
+  const teacherItems = (state.menuConfigs && state.menuConfigs.teacher) || [
+    { view: "home", icon: "⌂", label: "Início" },
     { view: "words", icon: "◈", label: "Palavras" },
-    { view: "users", icon: "◉", label: "Usuarios" },
+    { view: "users", icon: "◉", label: "Usuários" },
     { view: "games", icon: "▦", label: "Jogos" },
-    { view: "ranking", icon: "🏆", label: "Ranking" },
-    { view: "words", icon: "⌂", label: "Inicio" }
+    { view: "ranking", icon: "🏆", label: "Ranking" }
   ];
 
   els.topNavItems.forEach((item, index) => {
@@ -600,13 +699,13 @@ function configureTopMenuForTeacher() {
     }
   });
 
-  setTopMenuActive(state.teacherView || "words");
+  setTopMenuActive(state.teacherView || "home");
 }
 
 function configureTopMenuForStudent() {
-  const studentItems = [
-    { view: "home", icon: "⌂", label: "Inicio" },
-    { view: "modules", icon: "▦", label: "Modulos" },
+  const studentItems = (state.menuConfigs && state.menuConfigs.student) || [
+    { view: "home", icon: "⌂", label: "Início" },
+    { view: "modules", icon: "▦", label: "Módulos" },
     { view: "challenges", icon: "◈", label: "Desafios" },
     { view: "ranking", icon: "🏆", label: "Ranking" },
     { view: "profile", icon: "◉", label: "Perfil" }
@@ -634,18 +733,387 @@ function configureTopMenuForStudent() {
   setTopMenuActive("home");
 }
 
+function setStudentView(view) {
+  state.studentView = view;
+  els.studentViews.forEach((panel) => {
+    panel.classList.toggle("hidden", panel.dataset.studentView !== view);
+  });
+  setTopMenuActive(view);
+
+  if (view === "home") {
+    const hasActiveGame = state.board.some((column) => column.length > 0) || state.stock.length > 0;
+    if (hasActiveGame) {
+      enterGameFocusMode();
+    } else {
+      exitGameFocusMode();
+    }
+  } else {
+    exitGameFocusMode();
+  }
+
+  renderStudentView(view);
+}
+
 function setTeacherView(view) {
   state.teacherView = view;
   els.teacherPanels.forEach((panel) => {
     panel.classList.toggle("hidden", panel.dataset.teacherView !== view);
   });
   setTopMenuActive(view);
+  renderTeacherView(view);
 }
 
 function setTopMenuActive(view) {
   els.topNavItems.forEach((item) => {
     item.classList.toggle("active", item.dataset.view === view);
   });
+}
+
+function renderStudentView(view) {
+  if (!state.currentUser || state.currentUser.role !== "student") {
+    return;
+  }
+
+  if (view === "home") {
+    const hasActiveGame = state.board.some((column) => column.length > 0) || state.stock.length > 0;
+    if (!hasActiveGame && !state.gameConfig.suitCount) {
+      openSuitModal();
+      setMessage(els.suitModalMessage, "Escolha os naipes para iniciar uma partida.");
+    }
+    renderBoard();
+    renderCompletedRuns();
+    renderLiveMetrics();
+    renderStudentSidebar();
+    renderStudentHomePage();
+    return;
+  }
+
+  if (view === "modules") {
+    renderModulesPage();
+    return;
+  }
+
+  if (view === "challenges") {
+    renderChallengesPage();
+    return;
+  }
+
+  if (view === "ranking") {
+    renderStudentRankingPage();
+    return;
+  }
+
+  if (view === "profile") {
+    renderProfilePage();
+  }
+}
+
+function renderTeacherView(view) {
+  if (!state.currentUser || state.currentUser.role !== "teacher") {
+    return;
+  }
+
+  if (view === "home") {
+    renderTeacherHomePage();
+    return;
+  }
+
+  if (view === "words") {
+    renderWords();
+    return;
+  }
+
+  if (view === "users") {
+    renderUsersCrud();
+    return;
+  }
+
+  if (view === "games") {
+    renderGamesCrud();
+    return;
+  }
+
+  if (view === "ranking") {
+    renderRanking();
+  }
+}
+
+function renderTeacherHomePage() {
+  const words = getWords();
+  const users = getUsers();
+  const students = users.filter((item) => item.role === "student");
+  const games = getGames();
+  const topStudent = students.slice().sort((a, b) => (b.xp || 0) - (a.xp || 0))[0];
+  const winCount = games.filter((game) => game.result === "win").length;
+  const avgScore = games.length
+    ? Math.round(games.reduce((sum, game) => sum + (Number(game.score) || 0), 0) / games.length)
+    : 0;
+
+  if (els.teacherHomeStats) {
+    els.teacherHomeStats.innerHTML = `
+      <article class="mini-stat"><span>Palavras</span><strong>${words.length}</strong></article>
+      <article class="mini-stat"><span>Alunos</span><strong>${students.length}</strong></article>
+      <article class="mini-stat"><span>Jogos</span><strong>${games.length}</strong></article>
+      <article class="mini-stat"><span>Vitorias</span><strong>${winCount}</strong></article>
+    `;
+  }
+
+  if (els.teacherHomeSpotlight) {
+    els.teacherHomeSpotlight.innerHTML = `
+      <p><strong>Melhor aluno:</strong> ${topStudent ? `${topStudent.name} - ${topStudent.xp || 0} XP` : "Ainda sem alunos cadastrados."}</p>
+      <p><strong>Média de pontuação:</strong> ${avgScore} pontos</p>
+      <p><strong>Total de palavras:</strong> ${words.length} palavras ativas</p>
+    `;
+  }
+
+  if (els.teacherHomeRecentGames) {
+    const recentGames = games
+      .slice()
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, 5);
+
+    const usersById = new Map(users.map((user) => [user.id, user]));
+    els.teacherHomeRecentGames.innerHTML = recentGames.length
+      ? recentGames
+        .map((game) => {
+          const player = usersById.get(game.userId);
+          return `<li>${player ? player.name : "Usuario removido"} - ${game.result} - ${game.score} pts</li>`;
+        })
+        .join("")
+      : "<li>Nenhuma partida registrada ainda.</li>";
+  }
+}
+
+function renderStudentHomePage() {
+  const words = getWords();
+  const themes = [...new Set(words.map((item) => item.theme))].sort();
+
+  if (els.homeHighlights) {
+    els.homeHighlights.innerHTML = `
+      <article class="mini-stat"><span>Temas</span><strong>${themes.length}</strong></article>
+      <article class="mini-stat"><span>Palavras</span><strong>${words.length}</strong></article>
+      <article class="mini-stat"><span>Sequencias</span><strong>${state.completedRuns.length}/8</strong></article>
+      <article class="mini-stat"><span>Jogadas</span><strong>${state.gameStats.moves || 0}</strong></article>
+    `;
+  }
+
+  if (els.homeRecommendedTheme) {
+    els.homeRecommendedTheme.textContent = themes.length ? themes[0] : "Aguardando banco de palavras";
+  }
+
+  if (els.homeRecommendedAction) {
+    els.homeRecommendedAction.textContent = state.gameConfig.suitCount
+      ? "Continue sua partida ou volte aos desafios para revisar seu progresso."
+      : "Escolha os naipes no painel de jogo para iniciar uma partida.";
+  }
+
+  if (els.homeThemeList) {
+    els.homeThemeList.innerHTML = themes.length
+      ? themes
+        .map((theme) => {
+          const themeWords = words.filter((item) => item.theme === theme);
+          return `<li><strong>${theme}</strong> — ${themeWords.length} palavras</li>`;
+        })
+        .join("")
+      : "<li>Nenhum módulo encontrado.</li>";
+  }
+}
+
+function renderModulesPage() {
+  const words = getWords();
+  const byTheme = new Map();
+  const difficultySummary = new Map();
+
+  words.forEach((entry) => {
+    if (!byTheme.has(entry.theme)) {
+      byTheme.set(entry.theme, []);
+    }
+    byTheme.get(entry.theme).push(entry);
+
+    if (!difficultySummary.has(entry.difficulty)) {
+      difficultySummary.set(entry.difficulty, 0);
+    }
+    difficultySummary.set(entry.difficulty, difficultySummary.get(entry.difficulty) + 1);
+  });
+
+  const themes = [...byTheme.keys()].sort((a, b) => a.localeCompare(b));
+
+  if (els.homeHighlights) {
+    els.homeHighlights.innerHTML = `
+      <article class="mini-stat"><span>Temas</span><strong>${themes.length}</strong></article>
+      <article class="mini-stat"><span>Palavras</span><strong>${words.length}</strong></article>
+      <article class="mini-stat"><span>Nível mais comum</span><strong>${getMostCommonDifficulty(difficultySummary) || 0}</strong></article>
+      <article class="mini-stat"><span>Faixa</span><strong>${themes.length ? "1-13" : "-"}</strong></article>
+    `;
+  }
+
+  if (els.homeRecommendedTheme) {
+    els.homeRecommendedTheme.textContent = themes.length ? themes[0] : "Aguardando banco de palavras";
+  }
+
+  if (els.homeRecommendedAction) {
+    const strongestTheme = getLargestTheme(byTheme);
+    els.homeRecommendedAction.textContent = strongestTheme
+      ? `Comece por ${strongestTheme.theme}, que tem ${strongestTheme.count} palavras cadastradas.`
+      : "Adicione palavras no painel do professor para liberar módulos.";
+  }
+
+  if (els.homeThemeList) {
+    els.homeThemeList.innerHTML = themes.length
+      ? themes
+        .map((theme) => {
+          const themeWords = byTheme.get(theme) || [];
+          const minDifficulty = Math.min(...themeWords.map((item) => item.difficulty));
+          const maxDifficulty = Math.max(...themeWords.map((item) => item.difficulty));
+          return `<li><strong>${theme}</strong> — ${themeWords.length} palavras (dificuldade ${minDifficulty}-${maxDifficulty})</li>`;
+        })
+        .join("")
+      : "<li>Nenhum módulo encontrado.</li>";
+  }
+
+  if (els.moduleGrid) {
+    const cards = themes
+      .map((theme) => {
+        const themeWords = byTheme.get(theme) || [];
+        const minDifficulty = Math.min(...themeWords.map((item) => item.difficulty));
+        const maxDifficulty = Math.max(...themeWords.map((item) => item.difficulty));
+        const samples = themeWords.slice(0, 4).map((item) => item.word).join(", ");
+        const spanLabel = minDifficulty === maxDifficulty ? `${minDifficulty}` : `${minDifficulty} a ${maxDifficulty}`;
+
+        return `
+          <article class="module-card">
+            <h3>${theme}</h3>
+            <p>${themeWords.length} palavra(s) cadastradas</p>
+            <p>Dificuldade: ${spanLabel}</p>
+            <p class="module-samples">${samples || "Sem palavras ainda"}</p>
+          </article>
+        `;
+      })
+      .filter(Boolean);
+
+    els.moduleGrid.innerHTML = cards.length
+      ? cards.join("")
+      : '<div class="empty-state">Adicione palavras no painel do professor para liberar módulos.</div>';
+  }
+}
+
+function getMostCommonDifficulty(difficultySummary) {
+  let topDifficulty = null;
+  let topCount = -1;
+
+  difficultySummary.forEach((count, difficulty) => {
+    if (count > topCount) {
+      topCount = count;
+      topDifficulty = difficulty;
+    }
+  });
+
+  return topDifficulty;
+}
+
+function getLargestTheme(byTheme) {
+  let topTheme = null;
+  let topCount = -1;
+
+  byTheme.forEach((items, theme) => {
+    if (items.length > topCount) {
+      topCount = items.length;
+      topTheme = { theme, count: items.length };
+    }
+  });
+
+  return topTheme;
+}
+
+function renderChallengesPage() {
+  if (els.challengePageObjective) {
+    els.challengePageObjective.textContent = state.gameConfig.suitCount
+      ? `Objetivo atual: ${state.completedRuns.length}/8 sequências concluídas com ${state.gameConfig.suitCount} naipe(s).`
+      : "Nenhum desafio iniciado ainda. Escolha os naipes para começar.";
+  }
+
+  if (els.challengeProgressSummary) {
+    const validMoves = state.gameStats.moves || 0;
+    const invalidMoves = state.gameStats.invalidMoves || 0;
+    const totalAttempts = validMoves + invalidMoves;
+    const accuracy = totalAttempts ? Math.round((validMoves / totalAttempts) * 100) : 100;
+
+    els.challengeProgressSummary.innerHTML = `
+      <p><strong>Sequências concluídas:</strong> ${state.completedRuns.length}/8</p>
+      <p><strong>Jogadas válidas:</strong> ${state.gameStats.moves || 0}</p>
+      <p><strong>Precisão:</strong> ${accuracy}%</p>
+      <p><strong>Tempo:</strong> ${formatDuration(state.gameStats.elapsedSeconds || 0)}</p>
+    `;
+  }
+
+  if (els.challengeRunList) {
+    const runs = state.completedRuns.slice().reverse();
+    els.challengeRunList.innerHTML = runs.length
+      ? runs.map((run, index) => `<li>${index + 1}. ${run.suitSymbol} ${run.theme}</li>`).join("")
+      : "<li>Nenhuma sequência concluída ainda.</li>";
+  }
+}
+
+function renderStudentRankingPage() {
+  const students = getUsers()
+    .filter((item) => item.role === "student")
+    .sort((a, b) => (b.xp || 0) - (a.xp || 0));
+
+  if (els.studentRankingTableBody) {
+    els.studentRankingTableBody.innerHTML = students
+      .map((student, index) => {
+        const isCurrent = student.id === state.currentUser?.id;
+        return `
+          <tr class="${isCurrent ? "current-row" : ""}">
+            <td>${index + 1}º</td>
+            <td>${student.name}</td>
+            <td>${student.xp || 0}</td>
+            <td>${getLevel(student.xp || 0)}</td>
+            <td>${student.matches || 0}</td>
+          </tr>
+        `;
+      })
+      .join("");
+  }
+
+  if (els.studentRankingSummary) {
+    const position = students.findIndex((student) => student.id === state.currentUser?.id);
+    els.studentRankingSummary.textContent = position >= 0
+      ? `Sua posição atual é ${position + 1}º entre ${students.length} aluno(s).`
+      : "Você ainda não aparece no ranking de alunos.";
+  }
+}
+
+function renderProfilePage() {
+  const user = state.currentUser;
+  if (!user) {
+    return;
+  }
+
+  if (els.profileName) {
+    els.profileName.textContent = user.name || "-";
+  }
+  if (els.profileEmail) {
+    els.profileEmail.textContent = user.email || "-";
+  }
+  if (els.profileRole) {
+    els.profileRole.textContent = user.role === "teacher" ? "Professor" : "Aluno";
+  }
+  if (els.profileXp) {
+    els.profileXp.textContent = String(user.xp || 0);
+  }
+  if (els.profileLevel) {
+    els.profileLevel.textContent = String(getLevel(user.xp || 0));
+  }
+  if (els.profileMatches) {
+    els.profileMatches.textContent = String(user.matches || 0);
+  }
+  if (els.profileLastScore) {
+    els.profileLastScore.textContent = String(user.lastScore || 0);
+  }
+  if (els.profileBestScore) {
+    els.profileBestScore.textContent = String(user.bestScore || 0);
+  }
 }
 
 function renderWords() {
@@ -1311,6 +1779,18 @@ function buildSuitTopics(suitCount) {
 function renderBoard() {
   els.board.innerHTML = "";
 
+  const hasActiveGame = state.board.some((column) => column.length > 0) || state.stock.length > 0;
+  if (!hasActiveGame) {
+    const emptyState = document.createElement("div");
+    emptyState.className = "board-empty-state";
+    emptyState.innerHTML = `
+      <p>Nenhuma partida iniciada.</p>
+      <button type="button" class="btn-primary board-empty-cta" data-action="start-game">Escolher naipes</button>
+    `;
+    els.board.appendChild(emptyState);
+    return;
+  }
+
   state.board.forEach((columnCards, columnIndex) => {
     const offsets = getStackOffsets(columnCards);
     const column = document.createElement("div");
@@ -1331,6 +1811,7 @@ function renderBoard() {
       if (card.faceUp) {
         cardEl.innerHTML = `
           <span class="card-corner top">${card.rank} <span class="card-suit-symbol">${card.suitSymbol}</span></span>
+          <span class="card-center-suit">${card.suitSymbol}</span>
           <span class="card-word">${card.word}</span>
           <span class="card-theme">${card.theme}</span>
         `;
@@ -1338,7 +1819,7 @@ function renderBoard() {
         cardEl.innerHTML = '<span class="card-back-pattern"></span>';
       }
       cardEl.style.marginTop = cardIndex === 0 ? "0px" : `${offsets[cardIndex]}px`;
-      cardEl.style.zIndex = String(cardIndex + 1);
+      cardEl.style.zIndex = String(Math.max(1, cardIndex + 1));
       cardEl.dataset.columnIndex = String(columnIndex);
       cardEl.dataset.cardIndex = String(cardIndex);
       cardEl.addEventListener("click", onCardClick);
@@ -1381,18 +1862,18 @@ function getStackOffsets(columnCards) {
     return [0];
   }
 
-  const cardHeight = 112;
+  const cardHeight = 96;
   const isGameFocus = document.body.classList.contains("game-focus");
   const maxColumnHeight = isGameFocus
-    ? Math.round(Math.max(300, Math.min(560, window.innerHeight * 0.7)))
-    : Math.round(Math.max(210, Math.min(420, window.innerHeight * 0.55)));
+    ? Math.round(Math.max(250, Math.min(440, window.innerHeight * 0.56)))
+    : Math.round(Math.max(180, Math.min(320, window.innerHeight * 0.45)));
   const stackSize = columnCards.length;
   const growth = Math.max(0, stackSize - 4);
 
-  // Keep pile compact early and increase overlap as stack grows.
-  const faceUpOverlap = Math.max(-46, -3 - growth * 0.9);
-  // Hidden cards remain highly overlapped so they barely affect total height.
-  const hiddenOverlap = Math.max(-96, -52 - growth * 0.8);
+  // Keep pile compact while preserving a board proportion consistent with the rest of the app.
+  const faceUpOverlap = Math.max(-30, -10 - growth * 1.2);
+  // Hidden cards remain overlapped, but not so aggressively that they distort the board.
+  const hiddenOverlap = Math.max(-52, -26 - growth * 0.9);
 
   const offsets = [0];
   let estimatedHeight = cardHeight;
@@ -1419,7 +1900,7 @@ function getStackOffsets(columnCards) {
     const primaryStep = Math.ceil(overflowPrimary / Math.max(1, primaryTargets.length));
 
     primaryTargets.forEach((index) => {
-      offsets[index] = Math.max(-52, offsets[index] - primaryStep);
+      offsets[index] = Math.max(-36, offsets[index] - primaryStep);
     });
 
     // Final clamp in extreme piles so column height stays bounded.
@@ -1432,7 +1913,7 @@ function getStackOffsets(columnCards) {
       const overflowAll = estimatedHeight - maxColumnHeight;
       const allStep = Math.ceil(overflowAll / Math.max(1, allMovable.length));
       allMovable.forEach((index) => {
-        offsets[index] = Math.max(-98, offsets[index] - allStep);
+        offsets[index] = Math.max(-48, offsets[index] - allStep);
       });
     }
   }
@@ -2006,6 +2487,10 @@ function getLevel(xp) {
 }
 
 function setMessage(el, text, isError = false) {
+  if (!el) {
+    return;
+  }
+
   el.textContent = text;
   el.classList.remove("success", "error");
   if (!text) {

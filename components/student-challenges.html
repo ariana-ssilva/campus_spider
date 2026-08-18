@@ -1,0 +1,29 @@
+<section class="student-view hidden" data-student-view="challenges">
+  <div class="panel view-panel">
+    <div class="view-head">
+      <div>
+        <p class="eyebrow">Menu do aluno</p>
+        <h2>Desafios ativos</h2>
+        <p>Acompanhe a meta atual, a precisão e o andamento da partida.</p>
+      </div>
+      <div class="view-head-actions">
+        <button type="button" class="btn-primary" data-action="start-game">Novo jogo</button>
+        <button type="button" class="btn-outline" data-target-view="home">Voltar ao início</button>
+      </div>
+    </div>
+    <div class="challenge-grid">
+      <article class="info-card">
+        <h3>Objetivo atual</h3>
+        <p id="challengePageObjective">-</p>
+      </article>
+      <article class="info-card">
+        <h3>Resumo da partida</h3>
+        <div id="challengeProgressSummary" class="stacked-text"></div>
+      </article>
+      <article class="info-card">
+        <h3>Sequências completas</h3>
+        <ul id="challengeRunList" class="bullet-list"></ul>
+      </article>
+    </div>
+  </div>
+</section>

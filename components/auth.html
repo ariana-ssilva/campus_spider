@@ -1,0 +1,70 @@
+<section id="authSection" class="auth-panel">
+  <div class="auth-split">
+    <div class="auth-brand-side">
+      <div class="auth-brand-visual">
+        <img src="logo.png" alt="Logo Spider EDU" class="auth-brand-logo" />
+      </div>
+      <h2>Spider EDU</h2>
+      <p class="auth-brand-copy">Aprenda jogando. Evolua a cada jogada.</p>
+    </div>
+
+    <div class="auth-form-side">
+      <div class="panel auth-card">
+        <div class="auth-mode-switch" role="tablist" aria-label="Alternar autenticacao">
+          <button type="button" id="showLoginBtn" class="auth-mode-btn active" role="tab" aria-selected="true">Entrar</button>
+          <button type="button" id="showRegisterBtn" class="auth-mode-btn" role="tab" aria-selected="false">Cadastrar</button>
+        </div>
+        <h2 id="authTitle">Entrar</h2>
+
+        <div class="auth-forms-wrap">
+          <form id="loginForm" class="form-grid auth-form auth-form-active">
+            <label>
+              Email
+              <input type="email" id="email" placeholder="Digite seu email" required />
+            </label>
+            <label>
+              Senha
+              <div class="password-field">
+                <input type="password" id="password" placeholder="Digite sua senha" required />
+                <button type="button" class="password-toggle" data-target-input="password" aria-label="Mostrar senha">👁</button>
+              </div>
+            </label>
+            <button type="submit" class="btn-primary">Entrar</button>
+          </form>
+
+          <form id="registerForm" class="form-grid auth-form">
+            <label>
+              Nome
+              <input type="text" id="registerName" placeholder="Digite seu nome" required />
+            </label>
+            <label>
+              Email
+              <input type="email" id="registerEmail" placeholder="Digite seu email" required />
+            </label>
+            <label>
+              Senha
+              <div class="password-field">
+                <input type="password" id="registerPassword" placeholder="Crie uma senha" required />
+                <button type="button" class="password-toggle" data-target-input="registerPassword" aria-label="Mostrar senha">👁</button>
+              </div>
+            </label>
+            <label>
+              Confirmar senha
+              <div class="password-field">
+                <input type="password" id="registerPasswordConfirm" placeholder="Repita sua senha" required />
+                <button type="button" class="password-toggle" data-target-input="registerPasswordConfirm" aria-label="Mostrar senha">👁</button>
+              </div>
+            </label>
+            <button type="submit" class="btn-primary">Criar conta</button>
+          </form>
+        </div>
+
+        <div class="auth-links">
+          <a href="#" role="button">Esqueceu a senha?</a>
+        </div>
+
+        <p id="authMessage" class="message"></p>
+      </div>
+    </div>
+  </div>
+</section>

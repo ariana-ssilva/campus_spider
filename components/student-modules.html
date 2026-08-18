@@ -1,0 +1,28 @@
+<section class="student-view hidden" data-student-view="modules">
+  <div class="panel view-panel">
+    <div class="view-head">
+      <div>
+        <p class="eyebrow">Menu do aluno</p>
+        <h2>Módulos de estudo</h2>
+        <p>Veja os temas disponíveis e a distribuição do banco de palavras.</p>
+      </div>
+      <div class="view-head-actions">
+        <button type="button" class="btn-primary" data-action="start-game">Iniciar desafio</button>
+        <button type="button" class="btn-outline" data-target-view="home">Voltar ao início</button>
+      </div>
+    </div>
+    <div class="module-overview-grid">
+      <div class="mini-stats-grid" id="homeHighlights"></div>
+      <article class="info-card">
+        <h3>Recomendação do momento</h3>
+        <p id="homeRecommendedTheme">-</p>
+        <p id="homeRecommendedAction" class="stacked-text">-</p>
+      </article>
+      <article class="info-card">
+        <h3>Temas disponíveis</h3>
+        <ul id="homeThemeList" class="bullet-list"></ul>
+      </article>
+    </div>
+    <div class="module-grid" id="moduleGrid"></div>
+  </div>
+</section>

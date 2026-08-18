@@ -1,0 +1,27 @@
+[
+  {
+    "view": "home",
+    "icon": "⌂",
+    "label": "Início"
+  },
+  {
+    "view": "modules",
+    "icon": "▦",
+    "label": "Módulos"
+  },
+  {
+    "view": "challenges",
+    "icon": "◈",
+    "label": "Desafios"
+  },
+  {
+    "view": "ranking",
+    "icon": "🏆",
+    "label": "Ranking"
+  },
+  {
+    "view": "profile",
+    "icon": "◉",
+    "label": "Perfil"
+  }
+]

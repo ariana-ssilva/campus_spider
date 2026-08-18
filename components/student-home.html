@@ -1,0 +1,97 @@
+<section class="student-view" data-student-view="home">
+  <div class="student-layout">
+    <div class="main-column">
+      <div class="panel dashboard">
+        <div class="student-dashboard-header">
+          <h2>Painel do Aluno</h2>
+          <p id="studentWelcome"></p>
+        </div>
+        <div class="stats student-stats-row">
+          <div class="stat-card">
+            <span>XP</span>
+            <strong id="xpValue">0</strong>
+          </div>
+          <div class="stat-card">
+            <span>Nível</span>
+            <strong id="levelValue">1</strong>
+          </div>
+          <div class="stat-card">
+            <span>Partidas</span>
+            <strong id="matchesValue">0</strong>
+          </div>
+          <div class="stat-card">
+            <span>Última Pontuação</span>
+            <strong id="lastScoreValue">0</strong>
+          </div>
+          <div class="stat-card">
+            <span>Melhor Pontuação</span>
+            <strong id="bestScoreValue">0</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel game-controls">
+        <button id="newGameBtn" class="btn-primary" type="button">Novo jogo</button>
+        <button id="dealBtn" class="btn-outline">Distribuir pilha</button>
+        <button id="undoBtn" class="btn-outline">Desfazer</button>
+        <p id="gameMessage" class="message"></p>
+      </div>
+
+      <section class="game-board-wrap">
+        <div class="board-metrics">
+          <span class="metric-chip">Tempo: <strong id="metricTime" class="metric-value">00:00</strong></span>
+          <span class="metric-chip">Movimentos: <strong id="metricMoves" class="metric-value">0</strong></span>
+          <span class="metric-chip">Pontuação: <strong id="metricScore" class="metric-value">0</strong></span>
+        </div>
+
+        <div class="board-topbar">
+          <div class="completed-area">
+            <div class="completed-header">
+              <h3>Sequências concluídas</h3>
+              <span id="completedCount">0/8</span>
+            </div>
+            <div id="completedBoard" class="completed-board"></div>
+          </div>
+          <div class="stock-area">
+            <h3>Pilha restante</h3>
+            <button id="stockBtn" class="stock-btn" aria-label="Distribuir pilha restante" type="button">
+              <span id="stockCount" class="stock-count">0</span>
+            </button>
+          </div>
+        </div>
+        <div id="board" class="board"></div>
+      </section>
+    </div>
+
+    <aside class="side-column">
+      <div class="panel side-card">
+        <h3>Desafio Atual</h3>
+        <p id="challengeTheme" class="side-title">-</p>
+        <p id="challengeObjective">-</p>
+      </div>
+
+      <div class="panel side-card">
+        <h3>Ranking</h3>
+        <div id="studentRanking"></div>
+      </div>
+
+      <div class="panel side-card">
+        <h3>Progresso do Aluno</h3>
+        <div class="progress-grid">
+          <p>Acertos: <strong id="progressAccuracy">0%</strong></p>
+          <p>Desafios: <strong id="progressChallenges">0/8</strong></p>
+          <p>Medalhas: <strong id="progressMedals">0</strong></p>
+        </div>
+        <div class="xp-track">
+          <div id="progressXpBar" class="xp-fill"></div>
+        </div>
+        <p class="xp-caption"><strong id="progressXpCurrent">0</strong> / <span id="progressXpTarget">150</span> XP</p>
+      </div>
+
+      <div class="panel side-card">
+        <h3>Sequência</h3>
+        <p id="streakInfo">0 vitórias</p>
+      </div>
+    </aside>
+  </div>
+</section>

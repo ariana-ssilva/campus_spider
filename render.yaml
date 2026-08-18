@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: tcc-web
+    env: docker
+    branch: main
+    plan: free
+    dockerfilePath: Dockerfile
+    startCommand: python server.py
+
+databases:
+  - name: tcc-db
+    engine: postgres
+    version: "15"
+    plan: starter
+    disk: 10

@@ -1,0 +1,64 @@
+<div class="teacher-panel-section hidden" data-teacher-view="games">
+  <div class="teacher-grid">
+    <div class="teacher-box teacher-box-wide">
+      <h3>CRUD de jogos</h3>
+      <form id="gameForm" class="form-grid teacher-form-grid">
+        <input type="hidden" id="gameIdInput" />
+        <label>
+          Jogador
+          <select id="gameUserInput" required></select>
+        </label>
+        <label>
+          Naipe(s)
+          <select id="gameSuitCountInput" required>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="4">4</option>
+          </select>
+        </label>
+        <label>
+          Resultado
+          <select id="gameResultInput" required>
+            <option value="win">Vitória</option>
+            <option value="loss">Derrota</option>
+            <option value="abandoned">Abandonado</option>
+          </select>
+        </label>
+        <label>
+          Pontuação
+          <input type="number" id="gameScoreInput" min="0" value="0" required />
+        </label>
+        <label>
+          Movimentos
+          <input type="number" id="gameMovesInput" min="0" value="0" required />
+        </label>
+        <label>
+          Duração (s)
+          <input type="number" id="gameDurationInput" min="0" value="0" required />
+        </label>
+        <div class="teacher-form-actions">
+          <button type="submit" class="btn-primary">Salvar jogo</button>
+          <button type="button" id="cancelGameEditBtn" class="btn-outline">Cancelar edição</button>
+        </div>
+      </form>
+
+      <div class="table-wrap">
+        <table class="ranking-table">
+          <thead>
+            <tr>
+              <th>Jogador</th>
+              <th>Resultado</th>
+              <th>Naipe(s)</th>
+              <th>Pontos</th>
+              <th>Mov.</th>
+              <th>Duração</th>
+              <th>Data</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="gameCrudBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

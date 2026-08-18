@@ -8,12 +8,13 @@ try:
     from psycopg.rows import dict_row
 except ImportError as exc:  # pragma: no cover
     psycopg = None
+    PsycopgError = Exception
     IMPORT_ERROR = exc
 
-    class PsycopgError(Exception):
-        """Fallback error when psycopg is unavailable."""
-else:
-    IMPORT_ERROR = None
+try:
+    import mysql.connector
+except ImportError:  # pragma: no cover
+    mysql = None
 
 
 class RepositoryError(Exception):
@@ -26,6 +27,20 @@ class DataRepository:
         self._init_schema()
 
     def _connect(self):
+        engine = str(self.config.get("engine", "mysql")).lower()
+
+        if engine == "mysql":
+            if mysql is None:
+                raise RuntimeError("Pacote mysql-connector-python nao encontrado no ambiente Python ativo.")
+            return mysql.connector.connect(
+                host=self.config.get("host", "127.0.0.1"),
+                port=int(self.config.get("port", 3308)),
+                user=self.config.get("user", "root"),
+                password=self.config.get("password", "123456"),
+                database=self.config.get("database", "campus_spider"),
+                autocommit=True,
+            )
+
         if psycopg is None:
             raise RuntimeError(
                 "Pacote psycopg nao encontrado no ambiente Python ativo. "
@@ -33,10 +48,20 @@ class DataRepository:
             )
 
         database_url = str(self.config.get("database_url") or "").strip()
-        print(f"[DEBUG] database_url present: {bool(database_url)}")
+        database_url_external = str(self.config.get("database_url_external") or "").strip()
+        sslmode = str(self.config.get("sslmode") or "prefer")
+
+        def _is_dns_error(exc: Exception) -> bool:
+            message = str(exc).lower()
+            return "failed to resolve host" in message or "name or service not known" in message
+
         if database_url:
-            print(f"[DEBUG] database_url (first 60 chars): {database_url[:60]}")
-            return psycopg.connect(database_url, sslmode=self.config.get("sslmode", "require"))
+            try:
+                return psycopg.connect(database_url, sslmode=sslmode)
+            except PsycopgError as exc:
+                if database_url_external and database_url_external != database_url and _is_dns_error(exc):
+                    return psycopg.connect(database_url_external, sslmode=sslmode)
+                raise
 
         return psycopg.connect(
             host=self.config.get("host", "127.0.0.1"),
@@ -44,84 +69,152 @@ class DataRepository:
             user=self.config.get("user", "postgres"),
             password=self.config.get("password", ""),
             dbname=self.config.get("database", "campus_spider"),
-            sslmode=self.config.get("sslmode", "disable"),
+            sslmode=sslmode,
         )
 
     def _init_schema(self) -> None:
         try:
             with self._connect() as conn:
                 with conn.cursor() as cursor:
-                    cursor.execute(
-                        """
-                        CREATE TABLE IF NOT EXISTS users (
-                            id INTEGER PRIMARY KEY,
-                            name VARCHAR(120) NOT NULL,
-                            email VARCHAR(180) NOT NULL UNIQUE,
-                            password VARCHAR(255) NOT NULL,
-                            role VARCHAR(20) NOT NULL,
-                            xp INTEGER NOT NULL DEFAULT 0,
-                            matches INTEGER NOT NULL DEFAULT 0
-                        );
-                        """
-                    )
-                    cursor.execute(
-                        """
-                        CREATE TABLE IF NOT EXISTS words (
-                            id SERIAL PRIMARY KEY,
-                            word VARCHAR(180) NOT NULL,
-                            theme VARCHAR(120) NOT NULL,
-                            difficulty INTEGER NOT NULL
-                        );
-                        """
-                    )
-                    cursor.execute(
-                        """
-                        CREATE TABLE IF NOT EXISTS games (
-                            id INTEGER PRIMARY KEY,
-                            user_id INTEGER NOT NULL,
-                            suit_count INTEGER NOT NULL,
-                            result VARCHAR(20) NOT NULL,
-                            score INTEGER NOT NULL,
-                            moves INTEGER NOT NULL,
-                            duration_seconds INTEGER NOT NULL,
-                            created_at VARCHAR(60) NOT NULL,
-                            CONSTRAINT fk_games_users
-                                FOREIGN KEY (user_id)
-                                REFERENCES users(id)
-                                ON DELETE CASCADE
-                        );
-                        """
-                    )
-        except PsycopgError as exc:
+                    if self.config.get("engine", "mysql").lower() == "mysql":
+                        cursor.execute(
+                            """
+                            CREATE TABLE IF NOT EXISTS users (
+                                id INT PRIMARY KEY,
+                                name VARCHAR(120) NOT NULL,
+                                email VARCHAR(180) NOT NULL UNIQUE,
+                                password VARCHAR(255) NOT NULL,
+                                role VARCHAR(20) NOT NULL,
+                                xp INT NOT NULL DEFAULT 0,
+                                matches INT NOT NULL DEFAULT 0
+                            );
+                            """
+                        )
+                        cursor.execute(
+                            """
+                            CREATE TABLE IF NOT EXISTS words (
+                                id INT AUTO_INCREMENT PRIMARY KEY,
+                                word VARCHAR(180) NOT NULL,
+                                theme VARCHAR(120) NOT NULL,
+                                difficulty INT NOT NULL
+                            );
+                            """
+                        )
+                        cursor.execute(
+                            """
+                            CREATE TABLE IF NOT EXISTS games (
+                                id INT PRIMARY KEY,
+                                user_id INT NOT NULL,
+                                suit_count INT NOT NULL,
+                                result VARCHAR(20) NOT NULL,
+                                score INT NOT NULL,
+                                moves INT NOT NULL,
+                                duration_seconds INT NOT NULL,
+                                created_at VARCHAR(60) NOT NULL,
+                                CONSTRAINT fk_games_users
+                                    FOREIGN KEY (user_id)
+                                    REFERENCES users(id)
+                                    ON DELETE CASCADE
+                            );
+                            """
+                        )
+                    else:
+                        cursor.execute(
+                            """
+                            CREATE TABLE IF NOT EXISTS users (
+                                id INTEGER PRIMARY KEY,
+                                name VARCHAR(120) NOT NULL,
+                                email VARCHAR(180) NOT NULL UNIQUE,
+                                password VARCHAR(255) NOT NULL,
+                                role VARCHAR(20) NOT NULL,
+                                xp INTEGER NOT NULL DEFAULT 0,
+                                matches INTEGER NOT NULL DEFAULT 0
+                            );
+                            """
+                        )
+                        cursor.execute(
+                            """
+                            CREATE TABLE IF NOT EXISTS words (
+                                id SERIAL PRIMARY KEY,
+                                word VARCHAR(180) NOT NULL,
+                                theme VARCHAR(120) NOT NULL,
+                                difficulty INTEGER NOT NULL
+                            );
+                            """
+                        )
+                        cursor.execute(
+                            """
+                            CREATE TABLE IF NOT EXISTS games (
+                                id INTEGER PRIMARY KEY,
+                                user_id INTEGER NOT NULL,
+                                suit_count INTEGER NOT NULL,
+                                result VARCHAR(20) NOT NULL,
+                                score INTEGER NOT NULL,
+                                moves INTEGER NOT NULL,
+                                duration_seconds INTEGER NOT NULL,
+                                created_at VARCHAR(60) NOT NULL,
+                                CONSTRAINT fk_games_users
+                                    FOREIGN KEY (user_id)
+                                    REFERENCES users(id)
+                                    ON DELETE CASCADE
+                            );
+                            """
+                        )
+        except (PsycopgError, Exception) as exc:
             raise RepositoryError(str(exc)) from exc
 
     def read_bootstrap(self) -> dict[str, Any]:
         try:
             with self._connect() as conn:
-                with conn.cursor(row_factory=dict_row) as cursor:
-                    cursor.execute("SELECT * FROM users ORDER BY id ASC")
-                    users = cursor.fetchall()
+                if self.config.get("engine", "mysql").lower() == "mysql":
+                    with conn.cursor(dictionary=True) as cursor:
+                        cursor.execute("SELECT * FROM users ORDER BY id ASC")
+                        users = cursor.fetchall()
 
-                    cursor.execute("SELECT word, theme, difficulty FROM words ORDER BY id ASC")
-                    words_rows = cursor.fetchall()
+                        cursor.execute("SELECT word, theme, difficulty FROM words ORDER BY id ASC")
+                        words_rows = cursor.fetchall()
 
-                    cursor.execute(
-                        """
-                        SELECT
-                            id,
-                            user_id,
-                            suit_count,
-                            result,
-                            score,
-                            moves,
-                            duration_seconds,
-                            created_at
-                        FROM games
-                        ORDER BY id ASC
-                        """
-                    )
-                    games_rows = cursor.fetchall()
-        except PsycopgError as exc:
+                        cursor.execute(
+                            """
+                            SELECT
+                                id,
+                                user_id,
+                                suit_count,
+                                result,
+                                score,
+                                moves,
+                                duration_seconds,
+                                created_at
+                            FROM games
+                            ORDER BY id ASC
+                            """
+                        )
+                        games_rows = cursor.fetchall()
+                else:
+                    with conn.cursor(row_factory=dict_row) as cursor:
+                        cursor.execute("SELECT * FROM users ORDER BY id ASC")
+                        users = cursor.fetchall()
+
+                        cursor.execute("SELECT word, theme, difficulty FROM words ORDER BY id ASC")
+                        words_rows = cursor.fetchall()
+
+                        cursor.execute(
+                            """
+                            SELECT
+                                id,
+                                user_id,
+                                suit_count,
+                                result,
+                                score,
+                                moves,
+                                duration_seconds,
+                                created_at
+                            FROM games
+                            ORDER BY id ASC
+                            """
+                        )
+                        games_rows = cursor.fetchall()
+        except (PsycopgError, Exception) as exc:
             raise RepositoryError(str(exc)) from exc
 
         words = [
@@ -214,5 +307,5 @@ class DataRepository:
                                 str(game.get("createdAt", "")),
                             ),
                         )
-        except PsycopgError as exc:
+        except (PsycopgError, Exception) as exc:
             raise RepositoryError(str(exc)) from exc

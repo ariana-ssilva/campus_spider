@@ -1,0 +1,200 @@
+<section id="teacherSection" class="panel hidden">
+  <div class="teacher-pages">
+    <div class="teacher-panel-section" data-teacher-view="home">
+      <div class="view-head">
+        <div>
+          <p class="eyebrow">Menu do professor</p>
+          <h2>Painel do professor</h2>
+          <p>Resumo geral da turma, conteúdo e partidas registradas.</p>
+        </div>
+        <div class="view-head-actions">
+          <button type="button" class="btn-primary" data-target-view="words">Gerenciar palavras</button>
+          <button type="button" class="btn-outline" data-target-view="users">Gerenciar usuários</button>
+        </div>
+      </div>
+
+      <div class="mini-stats-grid" id="teacherHomeStats"></div>
+      <div class="teacher-home-grid">
+        <article class="teacher-home-card">
+          <h3>Destaque da turma</h3>
+          <div id="teacherHomeSpotlight" class="stacked-text"></div>
+        </article>
+        <article class="teacher-home-card">
+          <h3>Partidas recentes</h3>
+          <ul id="teacherHomeRecentGames" class="bullet-list"></ul>
+        </article>
+      </div>
+    </div>
+
+    <div class="teacher-panel-section hidden" data-teacher-view="words">
+      <div class="teacher-grid">
+        <div class="teacher-box">
+          <h3>Adicionar palavra</h3>
+          <form id="wordForm" class="form-grid">
+            <label>
+              Palavra
+              <input type="text" id="wordInput" required />
+            </label>
+            <label>
+              Tema
+              <input type="text" id="themeInput" required />
+            </label>
+            <label>
+              Dificuldade (1-13)
+              <input type="number" id="difficultyInput" min="1" max="13" required />
+            </label>
+            <button type="submit" class="btn-primary">Salvar palavra</button>
+          </form>
+        </div>
+
+        <div class="teacher-box">
+          <h3>Banco de palavras</h3>
+          <ul id="wordList" class="word-list"></ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="teacher-panel-section hidden" data-teacher-view="users">
+      <div class="teacher-grid">
+          <div class="teacher-box teacher-box-wide">
+          <h3>CRUD de usuários</h3>
+          <form id="userForm" class="form-grid teacher-form-grid">
+            <input type="hidden" id="userIdInput" />
+            <label>
+              Nome
+              <input type="text" id="userNameInput" required />
+            </label>
+            <label>
+              Email
+              <input type="email" id="userEmailInput" required />
+            </label>
+            <label>
+              Senha
+              <input type="text" id="userPasswordInput" required />
+            </label>
+            <label>
+              Perfil
+              <select id="userRoleInput" required>
+                <option value="student">Aluno</option>
+                <option value="teacher">Professor</option>
+              </select>
+            </label>
+            <label>
+              XP
+              <input type="number" id="userXpInput" min="0" value="0" required />
+            </label>
+            <label>
+              Partidas
+              <input type="number" id="userMatchesInput" min="0" value="0" required />
+            </label>
+            <div class="teacher-form-actions">
+              <button type="submit" class="btn-primary">Salvar usuário</button>
+              <button type="button" id="cancelUserEditBtn" class="btn-outline">Cancelar edição</button>
+            </div>
+          </form>
+
+          <div class="table-wrap">
+            <table class="ranking-table">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Email</th>
+                  <th>Perfil</th>
+                  <th>XP</th>
+                  <th>Partidas</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="userCrudBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="teacher-panel-section hidden" data-teacher-view="games">
+      <div class="teacher-grid">
+        <div class="teacher-box teacher-box-wide">
+          <h3>CRUD de jogos</h3>
+          <form id="gameForm" class="form-grid teacher-form-grid">
+            <input type="hidden" id="gameIdInput" />
+            <label>
+              Jogador
+              <select id="gameUserInput" required></select>
+            </label>
+            <label>
+              Naipe(s)
+              <select id="gameSuitCountInput" required>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="4">4</option>
+              </select>
+            </label>
+            <label>
+              Resultado
+              <select id="gameResultInput" required>
+                <option value="win">Vitória</option>
+                <option value="loss">Derrota</option>
+                <option value="abandoned">Abandonado</option>
+              </select>
+            </label>
+            <label>
+              Pontuação
+              <input type="number" id="gameScoreInput" min="0" value="0" required />
+            </label>
+            <label>
+              Movimentos
+              <input type="number" id="gameMovesInput" min="0" value="0" required />
+            </label>
+            <label>
+              Duração (s)
+              <input type="number" id="gameDurationInput" min="0" value="0" required />
+            </label>
+            <div class="teacher-form-actions">
+              <button type="submit" class="btn-primary">Salvar jogo</button>
+              <button type="button" id="cancelGameEditBtn" class="btn-outline">Cancelar edição</button>
+            </div>
+          </form>
+
+          <div class="table-wrap">
+            <table class="ranking-table">
+              <thead>
+                <tr>
+                  <th>Jogador</th>
+                  <th>Resultado</th>
+                  <th>Naipe(s)</th>
+                  <th>Pontos</th>
+                  <th>Mov.</th>
+                  <th>Duração</th>
+                  <th>Data</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="gameCrudBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="teacher-panel-section hidden" data-teacher-view="ranking">
+      <div class="teacher-grid">
+        <div class="teacher-box">
+          <h3>Ranking de alunos</h3>
+          <table class="ranking-table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>XP</th>
+                <th>Nível</th>
+                <th>Partidas</th>
+              </tr>
+            </thead>
+            <tbody id="rankingBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p id="teacherMessage" class="message"></p>
+</section>

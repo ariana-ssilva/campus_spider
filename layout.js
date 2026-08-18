@@ -1,6 +1,16 @@
 const PARTIALS = [
   { target: "headerSlot", file: "components/header.html" },
-  { target: "mainSlot", file: "components/main-content.html" },
+  { target: "authSlot", file: "components/auth.html" },
+  { target: "studentHomeSlot", file: "components/student-home.html" },
+  { target: "studentModulesSlot", file: "components/student-modules.html" },
+  { target: "studentChallengesSlot", file: "components/student-challenges.html" },
+  { target: "studentRankingSlot", file: "components/student-ranking.html" },
+  { target: "studentProfileSlot", file: "components/student-profile.html" },
+  { target: "teacherHomeSlot", file: "components/teacher-home.html" },
+  { target: "teacherWordsSlot", file: "components/teacher-words.html" },
+  { target: "teacherUsersSlot", file: "components/teacher-users.html" },
+  { target: "teacherGamesSlot", file: "components/teacher-games.html" },
+  { target: "teacherRankingSlot", file: "components/teacher-ranking.html" },
   { target: "modalSlot", file: "components/suit-modal.html" }
 ];
 
@@ -16,7 +26,13 @@ async function loadPartials() {
       throw new Error(`Falha ao carregar ${file}`);
     }
 
-    host.innerHTML = await response.text();
+    const html = await response.text();
+    // If host already has content, append to it; otherwise set innerHTML.
+    if (host.innerHTML && host.innerHTML.trim().length > 0) {
+      host.insertAdjacentHTML("beforeend", html);
+    } else {
+      host.innerHTML = html;
+    }
   });
 
   await Promise.all(tasks);
@@ -25,7 +41,7 @@ async function loadPartials() {
 function loadAppScript() {
   return new Promise((resolve, reject) => {
     const script = document.createElement("script");
-    script.src = "app.js";
+    script.src = `app.js?v=${Date.now()}`;
     script.async = false;
     script.onload = () => resolve();
     script.onerror = () => reject(new Error("Falha ao carregar app.js"));
