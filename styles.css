@@ -1255,12 +1255,12 @@ button {
 
 .game-board-wrap {
   background:
-    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08), transparent 28%),
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.08), transparent 28%),
     linear-gradient(180deg, #0c7c52 0%, #0a6b46 100%);
   border-radius: 22px;
   padding: 1rem;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04), 0 18px 32px rgba(10, 61, 38, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 18px 32px rgba(10, 61, 38, 0.18);
 }
 
 .board-metrics {
@@ -1417,7 +1417,7 @@ button {
   border: 1.5px solid rgba(148, 163, 184, 0.9);
   margin-top: -8px;
   font-size: 0.82rem;
-  box-shadow: 0 4px 8px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255,255,255,0.75);
+  box-shadow: 0 4px 8px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.75);
   position: relative;
   min-height: 54px;
   aspect-ratio: 3.2 / 4.6;
@@ -1440,7 +1440,7 @@ button {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0));
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
   pointer-events: none;
 }
 
@@ -1602,7 +1602,7 @@ button {
 .stock-area h3 {
   margin: 0;
   font-size: 0.9rem;
-  color: rgba(255,255,255,0.88);
+  color: rgba(255, 255, 255, 0.88);
 }
 
 .stock-btn {
@@ -1857,6 +1857,7 @@ button {
 }
 
 @media (max-width: 540px) {
+
   .profile-grid,
   .teacher-home-grid,
   .module-overview-grid,
@@ -2067,94 +2068,94 @@ button {
     display: none;
   }
 
+  .teacher-home-grid,
+  .module-overview-grid {
+
+    .brand-subtitle,
+    .level-pill,
+    .xp-pill,
+    .icon-btn,
+    .avatar-pill {
+      display: none;
+    }
+
+    .student-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .mini-stats-grid,
+    .profile-grid,
     .teacher-home-grid,
     .module-overview-grid {
-
-      .brand-subtitle,
-      .level-pill,
-      .xp-pill,
-      .icon-btn,
-      .avatar-pill {
-        display: none;
-      }
-
-      .student-layout {
-        grid-template-columns: 1fr;
-      }
-
-      .mini-stats-grid,
-      .profile-grid,
-      .teacher-home-grid,
-      .module-overview-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .profile-card-hero {
-        grid-row: auto;
-      }
-
-      .auth-split {
-        grid-template-columns: 1fr;
-        min-height: 100vh;
-      }
-
-      .auth-brand-side {
-        min-height: 250px;
-        padding: 2rem;
-      }
-
-      .auth-brand-side h2 {
-        font-size: 2.4rem;
-      }
-
-      .auth-brand-copy {
-        font-size: 1.25rem;
-      }
-
-      .teacher-form-actions {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      main {
-        width: 100%;
-      }
+      grid-template-columns: 1fr;
     }
 
-    @media (max-width: 780px) {
-      .board-topbar {
-        flex-direction: column;
-      }
+    .profile-card-hero {
+      grid-row: auto;
+    }
 
-      .stock-area {
-        width: 100%;
-        flex-direction: row;
-        justify-content: space-between;
-      }
+    .auth-split {
+      grid-template-columns: 1fr;
+      min-height: 100vh;
+    }
 
-      .board-metrics {
-        flex-direction: column;
-      }
+    .auth-brand-side {
+      min-height: 250px;
+      padding: 2rem;
+    }
 
-      .board {
-        grid-template-columns: repeat(2, 1fr);
-      }
+    .auth-brand-side h2 {
+      font-size: 2.4rem;
+    }
 
-      .column {
-        min-height: 200px;
-      }
+    .auth-brand-copy {
+      font-size: 1.25rem;
+    }
 
-      .view-head {
-        flex-direction: column;
-      }
+    .teacher-form-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
 
-      .view-head-actions {
-        width: 100%;
-      }
-
-      .view-head-actions .btn-primary,
-      .view-head-actions .btn-outline {
-        width: 100%;
-      }
+    main {
+      width: 100%;
     }
   }
+
+  @media (max-width: 780px) {
+    .board-topbar {
+      flex-direction: column;
+    }
+
+    .stock-area {
+      width: 100%;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+
+    .board-metrics {
+      flex-direction: column;
+    }
+
+    .board {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .column {
+      min-height: 200px;
+    }
+
+    .view-head {
+      flex-direction: column;
+    }
+
+    .view-head-actions {
+      width: 100%;
+    }
+
+    .view-head-actions .btn-primary,
+    .view-head-actions .btn-outline {
+      width: 100%;
+    }
+  }
+}
