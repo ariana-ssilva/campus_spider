@@ -25,6 +25,11 @@
     "label": "Ranking"
   },
   {
+    "view": "profile",
+    "icon": "fa-solid fa-circle-user",
+    "label": "Perfil"
+  },
+  {
     "view": "about",
     "icon": "fa-solid fa-circle-info",
     "label": "Sobre"

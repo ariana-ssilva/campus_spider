@@ -52,7 +52,9 @@ const state = {
     suitTopics: []
   },
   pendingDelete: null,
-  showInstructionsOnLogin: false
+  showInstructionsOnLogin: false,
+  instructionsReturnView: null,
+  draggingCard: false
 };
 
 const els = {
@@ -113,6 +115,12 @@ const els = {
   profileMatches: document.getElementById("profileMatches"),
   profileLastScore: document.getElementById("profileLastScore"),
   profileBestScore: document.getElementById("profileBestScore"),
+  teacherProfileName: document.getElementById("teacherProfileName"),
+  teacherProfileEmail: document.getElementById("teacherProfileEmail"),
+  teacherProfileRole: document.getElementById("teacherProfileRole"),
+  teacherProfileWords: document.getElementById("teacherProfileWords"),
+  teacherProfileStudents: document.getElementById("teacherProfileStudents"),
+  teacherProfileGames: document.getElementById("teacherProfileGames"),
   progressAccuracy: document.getElementById("progressAccuracy"),
   progressChallenges: document.getElementById("progressChallenges"),
   progressMedals: document.getElementById("progressMedals"),
@@ -123,7 +131,6 @@ const els = {
   levelPill: document.getElementById("levelPill"),
   topXpValue: document.getElementById("topXpValue"),
   xpPill: document.getElementById("xpPill"),
-  notificationBtn: document.getElementById("notificationBtn"),
   avatarPill: document.getElementById("avatarPill"),
   completedBoard: document.getElementById("completedBoard"),
   completedCount: document.getElementById("completedCount"),
@@ -187,8 +194,8 @@ async function loadMenuConfigs() {
   const result = { student: null, teacher: null };
   try {
     const [sRes, tRes] = await Promise.all([
-      fetch("/data/menu-student.json", { cache: "force-cache" }),
-      fetch("/data/menu-teacher.json", { cache: "force-cache" })
+      fetch("/data/menu-student.json?v=2", { cache: "force-cache" }),
+      fetch("/data/menu-teacher.json?v=2", { cache: "force-cache" })
     ]);
 
     if (sRes.ok) {
@@ -267,6 +274,7 @@ function bindEvents() {
   els.cancelDeleteBtn?.addEventListener("click", closeDeleteModal);
   els.confirmDeleteBtn?.addEventListener("click", confirmPendingDelete);
   document.querySelector("[data-close-delete-modal]")?.addEventListener("click", closeDeleteModal);
+  document.addEventListener("keydown", handleGlobalKeydown);
   document.addEventListener("click", handleGlobalClick);
   els.topNavItems.forEach((item) => item.addEventListener("click", handleTopMenuClick));
   document.querySelectorAll(".suit-choice-btn").forEach((button) => {
@@ -283,17 +291,17 @@ function handleGlobalClick(event) {
     return;
   }
 
+  const aboutNavItem = target.closest('.top-nav li[data-modal="instructions"]');
+  if (aboutNavItem && state.currentUser) {
+    event.preventDefault();
+    openInstructionsModal();
+    return;
+  }
+
   const topNavItem = target.closest('.top-nav li[data-view]');
   if (topNavItem && state.currentUser) {
     const view = topNavItem.dataset.view;
     if (!view) {
-      return;
-    }
-
-    if (view === "about") {
-      event.preventDefault();
-      setTopMenuActive(state.currentUser.role === "teacher" ? state.teacherView : state.studentView);
-      openInstructionsModal();
       return;
     }
 
@@ -308,6 +316,17 @@ function handleGlobalClick(event) {
 
   if (target.closest("#closeSuitModalBtn")) {
     closeSuitModal();
+    return;
+  }
+
+  const moduleCard = target.closest(".module-card[data-action='start-module']");
+  if (moduleCard && state.currentUser?.role === "student") {
+    setStudentView("home");
+    openSuitModal();
+    setMessage(
+      els.suitModalMessage,
+      `Escolha a quantidade de naipes para iniciar o tema ${moduleCard.dataset.theme}.`
+    );
     return;
   }
 
@@ -339,6 +358,20 @@ function handleGlobalClick(event) {
   }
 }
 
+function handleGlobalKeydown(event) {
+  if (event.key !== "Enter" && event.key !== " ") {
+    return;
+  }
+
+  const moduleCard = event.target.closest?.(".module-card[data-action='start-module']");
+  if (!moduleCard) {
+    return;
+  }
+
+  event.preventDefault();
+  moduleCard.click();
+}
+
 function restoreSession() {
   const sessionRaw = localStorage.getItem(STORAGE_KEYS.session);
   if (!sessionRaw) {
@@ -360,14 +393,97 @@ function restoreSession() {
   renderByRole();
 }
 
-function handleLogin(event) {
+async function hashPassword(password) {
+  const plainPassword = String(password ?? "").trim();
+  if (!plainPassword) {
+    return "";
+  }
+
+  if (window.crypto?.subtle) {
+    const salt = window.crypto.getRandomValues(new Uint8Array(16));
+    const saltB64 = btoa(String.fromCharCode(...salt));
+    const encoder = new TextEncoder();
+    const keyMaterial = await window.crypto.subtle.importKey(
+      "raw",
+      encoder.encode(plainPassword),
+      { name: "PBKDF2" },
+      false,
+      ["deriveBits"]
+    );
+    const derivedBits = await window.crypto.subtle.deriveBits(
+      {
+        name: "PBKDF2",
+        salt,
+        iterations: 120000,
+        hash: "SHA-256"
+      },
+      keyMaterial,
+      256
+    );
+    const hashB64 = btoa(String.fromCharCode(...new Uint8Array(derivedBits)));
+    return `pbkdf2_sha256$120000$${saltB64}$${hashB64}`;
+  }
+
+  return `sha256$${btoa(unescape(encodeURIComponent(plainPassword)))}`;
+}
+
+async function verifyPassword(password, storedPassword) {
+  if (!password || !storedPassword) {
+    return false;
+  }
+
+  if (storedPassword === password) {
+    return true;
+  }
+
+  if (typeof storedPassword !== "string") {
+    return false;
+  }
+
+  if (storedPassword.startsWith("pbkdf2_sha256$")) {
+    const [algorithm, iterations, saltB64, hashB64] = storedPassword.split("$");
+    if (algorithm !== "pbkdf2_sha256" || !saltB64 || !hashB64) {
+      return false;
+    }
+
+    try {
+      const salt = Uint8Array.from(atob(saltB64), (char) => char.charCodeAt(0));
+      const encoder = new TextEncoder();
+      const keyMaterial = await window.crypto.subtle.importKey(
+        "raw",
+        encoder.encode(String(password)),
+        { name: "PBKDF2" },
+        false,
+        ["deriveBits"]
+      );
+      const derivedBits = await window.crypto.subtle.deriveBits(
+        {
+          name: "PBKDF2",
+          salt,
+          iterations: Number(iterations),
+          hash: "SHA-256"
+        },
+        keyMaterial,
+        256
+      );
+      const computed = btoa(String.fromCharCode(...new Uint8Array(derivedBits)));
+      return computed === hashB64;
+    } catch {
+      return false;
+    }
+  }
+
+  return false;
+}
+
+async function handleLogin(event) {
   event.preventDefault();
   const email = els.email.value.trim().toLowerCase();
   const password = els.password.value.trim();
   const users = getUsers();
-  const user = users.find((item) => item.email === email && item.password === password);
+  const user = users.find((item) => item.email === email);
 
-  if (!user) {
+  if (!user || !(await verifyPassword(password, user.password))) {
     setAuthInputErrors();
     setMessage(els.authMessage, "Credenciais inválidas.", true);
     return;
@@ -380,7 +496,7 @@ function handleLogin(event) {
   renderByRole();
 }
 
-function handleRegister(event) {
+async function handleRegister(event) {
   event.preventDefault();
 
   const name = (els.registerName?.value || "").trim();
@@ -396,9 +512,9 @@ function handleRegister(event) {
     return;
   }
 
-  if (password.length < 6) {
+  if (password.length < 8) {
     setAuthInputErrors(els.registerPassword, els.registerPasswordConfirm);
-    setMessage(els.authMessage, "A senha deve ter pelo menos 6 caracteres.", true);
+    setMessage(els.authMessage, "A senha deve ter pelo menos 8 caracteres.", true);
     return;
   }
 
@@ -417,11 +533,12 @@ function handleRegister(event) {
   }
 
   const nextId = users.reduce((max, user) => Math.max(max, Number(user.id) || 0), 0) + 1;
+  const passwordHash = await hashPassword(password);
   const newUser = {
     id: nextId,
     name,
     email,
-    password,
+    password: passwordHash,
     role: "student",
     xp: 0,
     matches: 0
@@ -469,7 +586,6 @@ function renderByRole() {
   els.sessionInfo.classList.remove("hidden");
   els.levelPill?.classList.remove("hidden");
   els.xpPill?.classList.remove("hidden");
-  els.notificationBtn?.classList.remove("hidden");
   els.avatarPill?.classList.remove("hidden");
   els.sessionInfo.textContent = `${state.currentUser.name} (${state.currentUser.role === "teacher" ? "Professor" : "Aluno"})`;
 
@@ -513,7 +629,6 @@ function showAuth() {
   els.sessionInfo.classList.add("hidden");
   els.levelPill?.classList.add("hidden");
   els.xpPill?.classList.add("hidden");
-  els.notificationBtn?.classList.add("hidden");
   els.avatarPill?.classList.add("hidden");
   if (els.topXpValue) {
     els.topXpValue.textContent = "0 XP";
@@ -687,6 +802,7 @@ function configureTopMenuForTeacher() {
     { view: "users", icon: "fa-solid fa-circle-user", label: "Usuários" },
     { view: "games", icon: "fa-solid fa-bullseye", label: "Jogos" },
     { view: "ranking", icon: "fa-solid fa-ranking-star", label: "Ranking" },
+    { view: "profile", icon: "fa-solid fa-circle-user", label: "Perfil" },
     { view: "about", icon: "fa-solid fa-circle-info", label: "Sobre" }
   ];
 
@@ -698,7 +814,13 @@ function configureTopMenuForTeacher() {
     }
 
     item.classList.remove("hidden");
-    item.dataset.view = config.view;
+    if (config.view === "about") {
+      item.removeAttribute("data-view");
+      item.dataset.modal = "instructions";
+    } else {
+      item.dataset.view = config.view;
+      item.removeAttribute("data-modal");
+    }
     const iconEl = item.querySelector(".nav-icon");
     const labelEl = item.querySelector("span:last-child");
     if (iconEl) {
@@ -730,7 +852,13 @@ function configureTopMenuForStudent() {
     }
 
     item.classList.remove("hidden");
-    item.dataset.view = config.view;
+    if (config.view === "about") {
+      item.removeAttribute("data-view");
+      item.dataset.modal = "instructions";
+    } else {
+      item.dataset.view = config.view;
+      item.removeAttribute("data-modal");
+    }
     const iconEl = item.querySelector(".nav-icon");
     const labelEl = item.querySelector("span:last-child");
     if (iconEl) {
@@ -846,7 +974,34 @@ function renderTeacherView(view) {
 
   if (view === "ranking") {
     renderRanking();
+    return;
   }
+
+  if (view === "profile") {
+    renderTeacherProfile();
+  }
+}
+
+function renderTeacherProfile() {
+  const teacher = state.currentUser;
+  if (!teacher) {
+    return;
+  }
+
+  const users = getUsers();
+  const games = getGames();
+  const setText = (element, value) => {
+    if (element) {
+      element.textContent = String(value);
+    }
+  };
+
+  setText(els.teacherProfileName, teacher.name || "-");
+  setText(els.teacherProfileEmail, teacher.email || "-");
+  setText(els.teacherProfileRole, "Professor");
+  setText(els.teacherProfileWords, getWords().length);
+  setText(els.teacherProfileStudents, users.filter((user) => user.role === "student").length);
+  setText(els.teacherProfileGames, games.length);
 }
 
 function renderTeacherHomePage() {
@@ -992,7 +1147,14 @@ function renderModulesPage() {
         const spanLabel = minDifficulty === maxDifficulty ? `${minDifficulty}` : `${minDifficulty} a ${maxDifficulty}`;
 
         return `
-          <article class="module-card">
+          <article
+            class="module-card"
+            data-action="start-module"
+            data-theme="${theme}"
+            role="button"
+            tabindex="0"
+            aria-label="Iniciar desafio do tema ${theme}"
+          >
             <div class="module-card-topline">
               <span class="module-card-icon"><i class="fa-solid fa-book-open" aria-hidden="true"></i></span>
               <span class="module-difficulty">Níveis ${spanLabel}</span>
@@ -1279,29 +1441,34 @@ function renderUsersCrud() {
     .join("");
 }
 
-function saveUser(event) {
+async function saveUser(event) {
   event.preventDefault();
 
   const id = Number(els.userIdInput.value);
   const isEditing = Boolean(id);
   const name = els.userNameInput.value.trim();
   const email = els.userEmailInput.value.trim().toLowerCase();
-  const password = els.userPasswordInput.value.trim();
+  const passwordInput = els.userPasswordInput.value.trim();
   const role = els.userRoleInput.value;
   const xp = Math.max(0, Number(els.userXpInput.value) || 0);
   const matches = Math.max(0, Number(els.userMatchesInput.value) || 0);
+
+  const users = getUsers();
+  const existingUser = users.find((user) => user.id === id) || null;
+  const password = passwordInput || (existingUser ? existingUser.password || "" : "");
 
   if (!name || !email || !password || !["student", "teacher"].includes(role)) {
     setMessage(els.teacherMessage, "Preencha os campos de usuário corretamente.", true);
     return;
   }
 
-  const users = getUsers();
   const emailTaken = users.some((user) => user.email === email && user.id !== id);
   if (emailTaken) {
     setMessage(els.teacherMessage, "Já existe um usuário com este e-mail.", true);
     return;
   }
+
+  const passwordHash = await hashPassword(password);
 
   if (isEditing) {
     const index = users.findIndex((user) => user.id === id);
@@ -1314,7 +1481,7 @@ function saveUser(event) {
       ...users[index],
       name,
       email,
-      password,
+      password: passwordHash,
       role,
       xp: role === "student" ? xp : 0,
       matches: role === "student" ? matches : 0
@@ -1325,7 +1492,7 @@ function saveUser(event) {
       id: nextId,
       name,
       email,
-      password,
+      password: passwordHash,
       role,
       xp: role === "student" ? xp : 0,
       matches: role === "student" ? matches : 0
@@ -1377,7 +1544,7 @@ function handleUserCrudAction(event) {
     els.userIdInput.value = String(user.id);
     els.userNameInput.value = user.name || "";
     els.userEmailInput.value = user.email || "";
-    els.userPasswordInput.value = user.password || "";
+    els.userPasswordInput.value = "";
     els.userRoleInput.value = user.role || "student";
     els.userXpInput.value = String(user.xp || 0);
     els.userMatchesInput.value = String(user.matches || 0);
@@ -1831,14 +1998,22 @@ function closeWinModal() {
 }
 
 function openInstructionsModal() {
-  setTopMenuActive(state.currentUser?.role === "teacher" ? state.teacherView : state.studentView);
+  state.instructionsReturnView = state.currentUser?.role === "teacher" ? state.teacherView : state.studentView;
+  setTopMenuActive(state.instructionsReturnView);
   els.instructionsModal?.classList.remove("hidden");
 }
 
 function closeInstructionsModal() {
   els.instructionsModal?.classList.add("hidden");
-  const currentView = state.currentUser?.role === "teacher" ? state.teacherView : state.studentView;
-  setTopMenuActive(currentView);
+  const currentView = state.instructionsReturnView || (state.currentUser?.role === "teacher" ? state.teacherView : state.studentView) || "home";
+  state.instructionsReturnView = null;
+  if (state.currentUser?.role === "teacher" && state.teacherView !== currentView) {
+    setTeacherView(currentView);
+  } else if (state.currentUser?.role === "student" && state.studentView !== currentView) {
+    setStudentView(currentView);
+  } else {
+    setTopMenuActive(currentView);
+  }
   if (state.currentUser) {
     localStorage.setItem(
       STORAGE_KEYS.session,
@@ -1967,10 +2142,17 @@ function renderBoard() {
       cardEl.style.zIndex = String(Math.max(1, cardIndex + 1));
       cardEl.dataset.columnIndex = String(columnIndex);
       cardEl.dataset.cardIndex = String(cardIndex);
+      cardEl.draggable = card.faceUp;
+      if (card.faceUp) {
+        cardEl.addEventListener("dragstart", onCardDragStart);
+        cardEl.addEventListener("dragend", onCardDragEnd);
+      }
       cardEl.addEventListener("click", onCardClick);
       column.appendChild(cardEl);
     });
 
+    column.addEventListener("dragover", onColumnDragOver);
+    column.addEventListener("drop", (event) => onColumnDrop(event, columnIndex));
     column.addEventListener("click", () => tryMoveToColumn(columnIndex));
     els.board.appendChild(column);
   });
@@ -2068,6 +2250,9 @@ function getStackOffsets(columnCards) {
 
 function onCardClick(event) {
   event.stopPropagation();
+  if (state.draggingCard) {
+    return;
+  }
   const columnIndex = Number(event.currentTarget.dataset.columnIndex);
   const cardIndex = Number(event.currentTarget.dataset.cardIndex);
   const card = state.board[columnIndex][cardIndex];
@@ -2117,6 +2302,53 @@ function onCardClick(event) {
   };
 
   renderBoard();
+}
+
+function onCardDragStart(event) {
+  const card = event.currentTarget;
+  const columnIndex = Number(card.dataset.columnIndex);
+  const cardIndex = Number(card.dataset.cardIndex);
+
+  if (!isMovableStack(state.board[columnIndex], cardIndex)) {
+    event.preventDefault();
+    return;
+  }
+
+  state.draggingCard = true;
+  state.selectedCard = {
+    id: state.board[columnIndex][cardIndex].id,
+    fromColumn: columnIndex,
+    fromIndex: cardIndex,
+    rank: state.board[columnIndex][cardIndex].rank,
+    theme: state.board[columnIndex][cardIndex].theme
+  };
+  event.dataTransfer.effectAllowed = "move";
+  event.dataTransfer.setData("text/plain", state.selectedCard.id);
+  card.classList.add("dragging");
+}
+
+function onCardDragEnd(event) {
+  event.currentTarget.classList.remove("dragging");
+  state.draggingCard = false;
+}
+
+function onColumnDragOver(event) {
+  if (!state.selectedCard) {
+    return;
+  }
+
+  event.preventDefault();
+  event.dataTransfer.dropEffect = "move";
+}
+
+function onColumnDrop(event, columnIndex) {
+  event.preventDefault();
+  if (!state.selectedCard) {
+    return;
+  }
+
+  tryMoveToColumn(columnIndex);
+  state.draggingCard = false;
 }
 
 function tryMoveToColumn(targetColumnIndex) {

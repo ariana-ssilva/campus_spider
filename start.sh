@@ -6,7 +6,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MYSQL_HOST="${MYSQL_HOST:-127.0.0.1}"
 MYSQL_PORT="${MYSQL_PORT:-3308}"
 MYSQL_USER="${MYSQL_USER:-root}"
-MYSQL_PASSWORD="${MYSQL_PASSWORD:-123456}"
+MYSQL_PASSWORD="${MYSQL_PASSWORD:-change_me}"
 MYSQL_DATABASE="${MYSQL_DATABASE:-campus_spider}"
 
 if ! command -v docker >/dev/null 2>&1; then

@@ -33,11 +33,11 @@ class DataRepository:
             if mysql is None:
                 raise RuntimeError("Pacote mysql-connector-python nao encontrado no ambiente Python ativo.")
             return mysql.connector.connect(
-                host=self.config.get("host", "127.0.0.1"),
-                port=int(self.config.get("port", 3308)),
-                user=self.config.get("user", "root"),
-                password=self.config.get("password", "123456"),
-                database=self.config.get("database", "campus_spider"),
+                host=self.config.get("host") or "127.0.0.1",
+                port=int(self.config.get("port") or 3308),
+                user=self.config.get("user") or "root",
+                password=self.config.get("password") or "",
+                database=self.config.get("database") or "campus_spider",
                 autocommit=True,
             )
 
@@ -64,11 +64,11 @@ class DataRepository:
                 raise
 
         return psycopg.connect(
-            host=self.config.get("host", "127.0.0.1"),
-            port=int(self.config.get("port", 5432)),
-            user=self.config.get("user", "postgres"),
-            password=self.config.get("password", ""),
-            dbname=self.config.get("database", "campus_spider"),
+            host=self.config.get("host") or "127.0.0.1",
+            port=int(self.config.get("port") or 5432),
+            user=self.config.get("user") or "postgres",
+            password=self.config.get("password") or "",
+            dbname=self.config.get("database") or "campus_spider",
             sslmode=sslmode,
         )
 

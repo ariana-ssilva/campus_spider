@@ -10,6 +10,7 @@ const PARTIALS = [
   { target: "teacherWordsSlot", file: "components/teacher-words.html" },
   { target: "teacherUsersSlot", file: "components/teacher-users.html" },
   { target: "teacherGamesSlot", file: "components/teacher-games.html" },
+  { target: "teacherProfileSlot", file: "components/teacher-profile.html" },
   { target: "teacherRankingSlot", file: "components/teacher-ranking.html" },
   { target: "modalSlot", file: "components/suit-modal.html" }
 ];
@@ -21,7 +22,7 @@ async function loadPartials() {
       throw new Error(`Container ausente: ${target}`);
     }
 
-    const response = await fetch(file, { cache: "force-cache" });
+    const response = await fetch(`${file}?v=5`, { cache: "force-cache" });
     if (!response.ok) {
       throw new Error(`Falha ao carregar ${file}`);
     }
