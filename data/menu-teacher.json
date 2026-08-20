@@ -1,32 +1,32 @@
 [
   {
     "view": "home",
-    "icon": "⌂",
+    "icon": "fa-solid fa-house",
     "label": "Início"
   },
   {
     "view": "words",
-    "icon": "◈",
+    "icon": "fa-solid fa-layer-group",
     "label": "Palavras"
   },
   {
     "view": "users",
-    "icon": "◉",
+    "icon": "fa-solid fa-circle-user",
     "label": "Usuários"
   },
   {
     "view": "games",
-    "icon": "▦",
+    "icon": "fa-solid fa-bullseye",
     "label": "Jogos"
   },
   {
     "view": "ranking",
-    "icon": "🏆",
+    "icon": "fa-solid fa-ranking-star",
     "label": "Ranking"
   },
   {
     "view": "about",
-    "icon": "ⓘ",
+    "icon": "fa-solid fa-circle-info",
     "label": "Sobre"
   }
 ]

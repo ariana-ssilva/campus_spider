@@ -470,6 +470,70 @@ body.auth-view .auth-split {
   gap: 0.85rem;
 }
 
+.module-summary {
+  margin-bottom: 0.85rem;
+}
+
+.module-insights {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+  gap: 0.85rem;
+  margin-bottom: 1.35rem;
+}
+
+.module-insights .info-card {
+  min-height: 150px;
+}
+
+.info-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+}
+
+.info-card-heading h3 {
+  margin: 0;
+}
+
+.section-icon,
+.module-card-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.module-featured-theme {
+  margin: 0 0 0.35rem;
+  color: #1e3a8a;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.module-section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.7rem;
+}
+
+.module-section-heading h3 {
+  margin: 0.15rem 0 0;
+  color: #1e293b;
+}
+
+.module-section-hint {
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
 .module-grid {
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
 }
@@ -500,9 +564,48 @@ body.auth-view .auth-split {
   margin-top: 0;
 }
 
+.module-card {
+  min-height: 185px;
+  display: flex;
+  flex-direction: column;
+}
+
+.module-card-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+}
+
+.module-difficulty {
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: #047857;
+  font-size: 0.75rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.module-card h3 {
+  margin-bottom: 0.35rem;
+  color: #1e293b;
+}
+
+.module-count {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
 .module-samples {
+  margin-top: auto;
+  padding-top: 0.85rem;
   color: #475569;
   font-size: 0.92rem;
+  line-height: 1.5;
 }
 
 .module-overview-grid .info-card {
@@ -1738,6 +1841,16 @@ button {
     grid-template-columns: 1fr 1fr;
   }
 
+  .module-insights {
+    grid-template-columns: 1fr;
+  }
+
+  .module-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
   .board {
     grid-template-columns: repeat(5, minmax(70px, 1fr));
   }
@@ -1749,6 +1862,11 @@ button {
   .module-overview-grid,
   .mini-stats-grid {
     grid-template-columns: 1fr;
+  }
+
+  .module-card-topline {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .auth-card {

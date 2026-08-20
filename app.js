@@ -5,42 +5,20 @@ const STORAGE_KEYS = {
   games: "campusSpiderGames"
 };
 
-const DEFAULT_USERS = [
-  { id: 1, name: "Prof. Helena", email: "prof@campus.com", password: "123456", role: "teacher" },
-  {
-    id: 2,
-    name: "Lucas Aluno",
-    email: "aluno1@campus.com",
-    password: "123456",
-    role: "student",
-    xp: 0,
-    matches: 0
-  },
-  {
-    id: 3,
-    name: "Marina Aluna",
-    email: "aluno2@campus.com",
-    password: "123456",
-    role: "student",
-    xp: 0,
-    matches: 0
-  }
-];
-
 const DEFAULT_WORDS = [
-  { word: "Pesquisa", theme: "Metodologia", difficulty: 1 },
-  { word: "Resumo", theme: "Acadêmico", difficulty: 2 },
-  { word: "Leitura", theme: "Linguagens", difficulty: 3 },
-  { word: "Ciência", theme: "Geral", difficulty: 4 },
-  { word: "Projeto", theme: "Engenharia", difficulty: 5 },
-  { word: "Laboratório", theme: "Prática", difficulty: 6 },
-  { word: "Hipótese", theme: "Metodologia", difficulty: 7 },
-  { word: "Análise", theme: "Dados", difficulty: 8 },
-  { word: "Teorema", theme: "Matemática", difficulty: 9 },
-  { word: "Seminário", theme: "Comunicação", difficulty: 10 },
-  { word: "Dissertação", theme: "Acadêmico", difficulty: 11 },
-  { word: "Epistemologia", theme: "Filosofia", difficulty: 12 },
-  { word: "Interdisciplinar", theme: "Geral", difficulty: 13 }
+  { word: "Ensino", theme: "Educação", difficulty: 1 },
+  { word: "Estudo", theme: "Aprendizagem", difficulty: 2 },
+  { word: "Aluno", theme: "Educação", difficulty: 3 },
+  { word: "Desafio", theme: "Gamificação", difficulty: 4 },
+  { word: "Progresso", theme: "Gamificação", difficulty: 5 },
+  { word: "Motivação", theme: "Aprendizagem", difficulty: 6 },
+  { word: "Interação", theme: "Tecnologia", difficulty: 7 },
+  { word: "Estratégia", theme: "Jogos", difficulty: 8 },
+  { word: "Engajamento", theme: "Gamificação", difficulty: 9 },
+  { word: "Cognição", theme: "Aprendizagem", difficulty: 10 },
+  { word: "Metodologia", theme: "Educação", difficulty: 11 },
+  { word: "Interatividade", theme: "Tecnologia", difficulty: 12 },
+  { word: "Aprendizagem", theme: "Educação", difficulty: 13 }
 ];
 
 const DEFAULT_GAMES = [];
@@ -244,10 +222,6 @@ async function init() {
 window.initializeSpiderEduApp = init;
 
 function seedData() {
-  if (!localStorage.getItem(STORAGE_KEYS.users)) {
-    localStorage.setItem(STORAGE_KEYS.users, JSON.stringify(DEFAULT_USERS));
-  }
-
   if (!localStorage.getItem(STORAGE_KEYS.words)) {
     localStorage.setItem(STORAGE_KEYS.words, JSON.stringify(DEFAULT_WORDS));
   }
@@ -395,7 +369,7 @@ function handleLogin(event) {
 
   if (!user) {
     setAuthInputErrors();
-    setMessage(els.authMessage, "Credenciais invalidas.", true);
+    setMessage(els.authMessage, "Credenciais inválidas.", true);
     return;
   }
 
@@ -430,7 +404,7 @@ function handleRegister(event) {
 
   if (password !== passwordConfirm) {
     setAuthInputErrors(els.registerPassword, els.registerPasswordConfirm);
-    setMessage(els.authMessage, "As senhas nao coincidem.", true);
+    setMessage(els.authMessage, "As senhas não coincidem.", true);
     return;
   }
 
@@ -644,7 +618,7 @@ function togglePasswordVisibility(button) {
 function renderStudentInfo() {
   const student = refreshCurrentUser();
   const level = getLevel(student.xp || 0);
-  els.studentWelcome.textContent = `Bom estudo, ${student.name}. Forme sequencias completas para ganhar XP.`;
+  els.studentWelcome.textContent = `Bom estudo, ${student.name}. Forme sequências completas para ganhar XP.`;
   els.xpValue.textContent = String(student.xp || 0);
   els.levelValue.textContent = String(level);
   els.matchesValue.textContent = String(student.matches || 0);
@@ -708,12 +682,12 @@ function handleTopMenuClick(event) {
 
 function configureTopMenuForTeacher() {
   const teacherItems = (state.menuConfigs && state.menuConfigs.teacher) || [
-    { view: "home", icon: "⌂", label: "Início" },
-    { view: "words", icon: "◈", label: "Palavras" },
-    { view: "users", icon: "◉", label: "Usuários" },
-    { view: "games", icon: "▦", label: "Jogos" },
-    { view: "ranking", icon: "🏆", label: "Ranking" },
-    { view: "about", icon: "ⓘ", label: "Sobre" }
+    { view: "home", icon: "fa-solid fa-house", label: "Início" },
+    { view: "words", icon: "fa-solid fa-layer-group", label: "Palavras" },
+    { view: "users", icon: "fa-solid fa-circle-user", label: "Usuários" },
+    { view: "games", icon: "fa-solid fa-bullseye", label: "Jogos" },
+    { view: "ranking", icon: "fa-solid fa-ranking-star", label: "Ranking" },
+    { view: "about", icon: "fa-solid fa-circle-info", label: "Sobre" }
   ];
 
   els.topNavItems.forEach((item, index) => {
@@ -728,7 +702,7 @@ function configureTopMenuForTeacher() {
     const iconEl = item.querySelector(".nav-icon");
     const labelEl = item.querySelector("span:last-child");
     if (iconEl) {
-      iconEl.textContent = config.icon;
+      iconEl.innerHTML = `<i class="${config.icon}" aria-hidden="true"></i>`;
     }
     if (labelEl) {
       labelEl.textContent = config.label;
@@ -740,12 +714,12 @@ function configureTopMenuForTeacher() {
 
 function configureTopMenuForStudent() {
   const studentItems = (state.menuConfigs && state.menuConfigs.student) || [
-    { view: "home", icon: "⌂", label: "Início" },
-    { view: "modules", icon: "▦", label: "Módulos" },
-    { view: "challenges", icon: "◈", label: "Desafios" },
-    { view: "ranking", icon: "🏆", label: "Ranking" },
-    { view: "profile", icon: "◉", label: "Perfil" },
-    { view: "about", icon: "ⓘ", label: "Sobre" }
+    { view: "home", icon: "fa-solid fa-house", label: "Início" },
+    { view: "modules", icon: "fa-solid fa-layer-group", label: "Módulos" },
+    { view: "challenges", icon: "fa-solid fa-bullseye", label: "Desafios" },
+    { view: "ranking", icon: "fa-solid fa-ranking-star", label: "Ranking" },
+    { view: "profile", icon: "fa-solid fa-circle-user", label: "Perfil" },
+    { view: "about", icon: "fa-solid fa-circle-info", label: "Sobre" }
   ];
 
   els.topNavItems.forEach((item, index) => {
@@ -760,7 +734,7 @@ function configureTopMenuForStudent() {
     const iconEl = item.querySelector(".nav-icon");
     const labelEl = item.querySelector("span:last-child");
     if (iconEl) {
-      iconEl.textContent = config.icon;
+      iconEl.innerHTML = `<i class="${config.icon}" aria-hidden="true"></i>`;
     }
     if (labelEl) {
       labelEl.textContent = config.label;
@@ -891,7 +865,7 @@ function renderTeacherHomePage() {
       <article class="mini-stat"><span>Palavras</span><strong>${words.length}</strong></article>
       <article class="mini-stat"><span>Alunos</span><strong>${students.length}</strong></article>
       <article class="mini-stat"><span>Jogos</span><strong>${games.length}</strong></article>
-      <article class="mini-stat"><span>Vitorias</span><strong>${winCount}</strong></article>
+      <article class="mini-stat"><span>Vitórias</span><strong>${winCount}</strong></article>
     `;
   }
 
@@ -914,7 +888,7 @@ function renderTeacherHomePage() {
       ? recentGames
         .map((game) => {
           const player = usersById.get(game.userId);
-          return `<li>${player ? player.name : "Usuario removido"} - ${game.result} - ${game.score} pts</li>`;
+          return `<li>${player ? player.name : "Usuário removido"} - ${game.result} - ${game.score} pontos</li>`;
         })
         .join("")
       : "<li>Nenhuma partida registrada ainda.</li>";
@@ -929,7 +903,7 @@ function renderStudentHomePage() {
     els.homeHighlights.innerHTML = `
       <article class="mini-stat"><span>Temas</span><strong>${themes.length}</strong></article>
       <article class="mini-stat"><span>Palavras</span><strong>${words.length}</strong></article>
-      <article class="mini-stat"><span>Sequencias</span><strong>${state.completedRuns.length}/8</strong></article>
+      <article class="mini-stat"><span>Sequências</span><strong>${state.completedRuns.length}/8</strong></article>
       <article class="mini-stat"><span>Jogadas</span><strong>${state.gameStats.moves || 0}</strong></article>
     `;
   }
@@ -1019,9 +993,12 @@ function renderModulesPage() {
 
         return `
           <article class="module-card">
+            <div class="module-card-topline">
+              <span class="module-card-icon"><i class="fa-solid fa-book-open" aria-hidden="true"></i></span>
+              <span class="module-difficulty">Níveis ${spanLabel}</span>
+            </div>
             <h3>${theme}</h3>
-            <p>${themeWords.length} palavra(s) cadastradas</p>
-            <p>Dificuldade: ${spanLabel}</p>
+            <p class="module-count">${themeWords.length} palavra(s) cadastradas</p>
             <p class="module-samples">${samples || "Sem palavras ainda"}</p>
           </article>
         `;
@@ -1215,7 +1192,7 @@ function saveWord(event) {
   if (isEditing) {
     const index = words.findIndex((item, itemIndex) => (Number(item.id) || itemIndex + 1) === id);
     if (index === -1) {
-      setMessage(els.teacherMessage, "Palavra nao encontrada.", true);
+      setMessage(els.teacherMessage, "Palavra não encontrada.", true);
       return;
     }
 
@@ -1248,7 +1225,7 @@ function handleWordCrudAction(event) {
   const selectedWord = index === -1 ? null : words[index];
 
   if (!selectedWord) {
-    setMessage(els.teacherMessage, "Palavra nao encontrada.", true);
+    setMessage(els.teacherMessage, "Palavra não encontrada.", true);
     return;
   }
 
@@ -1315,21 +1292,21 @@ function saveUser(event) {
   const matches = Math.max(0, Number(els.userMatchesInput.value) || 0);
 
   if (!name || !email || !password || !["student", "teacher"].includes(role)) {
-    setMessage(els.teacherMessage, "Preencha os campos de usuario corretamente.", true);
+    setMessage(els.teacherMessage, "Preencha os campos de usuário corretamente.", true);
     return;
   }
 
   const users = getUsers();
   const emailTaken = users.some((user) => user.email === email && user.id !== id);
   if (emailTaken) {
-    setMessage(els.teacherMessage, "Ja existe um usuario com este email.", true);
+    setMessage(els.teacherMessage, "Já existe um usuário com este e-mail.", true);
     return;
   }
 
   if (isEditing) {
     const index = users.findIndex((user) => user.id === id);
     if (index === -1) {
-      setMessage(els.teacherMessage, "Usuario nao encontrado.", true);
+      setMessage(els.teacherMessage, "Usuário não encontrado.", true);
       return;
     }
 
@@ -1377,7 +1354,7 @@ function saveUser(event) {
   }
 
   resetUserForm();
-  setMessage(els.teacherMessage, isEditing ? "Usuario atualizado com sucesso." : "Usuario criado com sucesso.");
+  setMessage(els.teacherMessage, isEditing ? "Usuário atualizado com sucesso." : "Usuário criado com sucesso.");
 }
 
 function handleUserCrudAction(event) {
@@ -1392,7 +1369,7 @@ function handleUserCrudAction(event) {
   const user = users.find((item) => item.id === id);
 
   if (!user) {
-    setMessage(els.teacherMessage, "Usuario nao encontrado.", true);
+    setMessage(els.teacherMessage, "Usuário não encontrado.", true);
     return;
   }
 
@@ -1404,13 +1381,13 @@ function handleUserCrudAction(event) {
     els.userRoleInput.value = user.role || "student";
     els.userXpInput.value = String(user.xp || 0);
     els.userMatchesInput.value = String(user.matches || 0);
-    setMessage(els.teacherMessage, `Editando usuario: ${user.name}`);
+    setMessage(els.teacherMessage, `Editando usuário: ${user.name}`);
     return;
   }
 
   if (action === "delete-user") {
     if (state.currentUser?.id === user.id) {
-      setMessage(els.teacherMessage, "Nao e permitido excluir o usuario logado.", true);
+      setMessage(els.teacherMessage, "Não é permitido excluir o usuário conectado.", true);
       return;
     }
 
@@ -1446,9 +1423,9 @@ function renderGamesCrud() {
   els.gameCrudBody.innerHTML = games
     .map((game) => {
       const user = usersById.get(game.userId);
-      const playerName = user ? user.name : "Usuario removido";
+      const playerName = user ? user.name : "Usuário removido";
       const resultLabel =
-        game.result === "win" ? "Vitoria" : game.result === "loss" ? "Derrota" : "Abandonado";
+        game.result === "win" ? "Vitória" : game.result === "loss" ? "Derrota" : "Abandonada";
       return `
         <tr>
           <td>${playerName}</td>
@@ -1496,7 +1473,7 @@ function saveGame(event) {
   if (isEditing) {
     const index = games.findIndex((game) => game.id === id);
     if (index === -1) {
-      setMessage(els.teacherMessage, "Jogo nao encontrado.", true);
+      setMessage(els.teacherMessage, "Jogo não encontrado.", true);
       return;
     }
 
@@ -1541,7 +1518,7 @@ function handleGameCrudAction(event) {
   const game = games.find((item) => item.id === id);
 
   if (!game) {
-    setMessage(els.teacherMessage, "Jogo nao encontrado.", true);
+    setMessage(els.teacherMessage, "Jogo não encontrado.", true);
     return;
   }
 
@@ -1612,7 +1589,7 @@ function confirmPendingDelete() {
       setWords(words.filter((_, itemIndex) => itemIndex !== index));
       renderWords();
       resetWordForm();
-      setMessage(els.teacherMessage, "Palavra excluida com sucesso.");
+      setMessage(els.teacherMessage, "Palavra excluída com sucesso.");
     }
   }
 
@@ -1627,7 +1604,7 @@ function confirmPendingDelete() {
       renderRanking();
       populateGameUserOptions();
       resetUserForm();
-      setMessage(els.teacherMessage, "Usuario excluido com sucesso.");
+      setMessage(els.teacherMessage, "Usuário excluído com sucesso.");
     }
   }
 
@@ -1636,7 +1613,7 @@ function confirmPendingDelete() {
     setGames(games.filter((item) => item.id !== pendingDelete.id));
     renderGamesCrud();
     resetGameForm();
-    setMessage(els.teacherMessage, "Jogo excluido com sucesso.");
+    setMessage(els.teacherMessage, "Jogo excluído com sucesso.");
   }
 
   closeDeleteModal();
@@ -1862,11 +1839,6 @@ function closeInstructionsModal() {
   els.instructionsModal?.classList.add("hidden");
   const currentView = state.currentUser?.role === "teacher" ? state.teacherView : state.studentView;
   setTopMenuActive(currentView);
-  if (state.currentUser?.role === "teacher") {
-    setTeacherView(currentView);
-  } else if (state.currentUser?.role === "student") {
-    setStudentView(currentView);
-  }
   if (state.currentUser) {
     localStorage.setItem(
       STORAGE_KEYS.session,
@@ -1921,7 +1893,7 @@ function exitGameFocusMode() {
 function applyGameConfig(suitCount) {
   const valid = [1, 2, 4];
   if (!valid.includes(suitCount)) {
-    setMessage(els.suitModalMessage, "Opcao de naipe invalida.", true);
+    setMessage(els.suitModalMessage, "Opção de naipe inválida.", true);
     return;
   }
 
@@ -2130,7 +2102,7 @@ function onCardClick(event) {
     renderStudentSidebar();
     setMessage(
       els.gameMessage,
-      "No Spider real, grupo movel precisa estar em sequencia e mesmo naipe.",
+      "No Spider real, o grupo móvel precisa estar em sequência e ser do mesmo naipe.",
       true
     );
     return;
@@ -2166,7 +2138,7 @@ function tryMoveToColumn(targetColumnIndex) {
   if (!canPlaceCard(movingCard, targetTop)) {
     state.gameStats.invalidMoves += 1;
     renderStudentSidebar();
-    setMessage(els.gameMessage, "Jogada invalida. A carta deve ir sobre rank maior em 1.", true);
+    setMessage(els.gameMessage, "Jogada inválida. A carta deve ser colocada sobre outra de valor imediatamente maior.", true);
     return false;
   }
 
@@ -2262,7 +2234,7 @@ function resolveCompletedRun(columnIndex) {
   renderCompletedRuns();
   setMessage(
     els.gameMessage,
-    `${removedRuns} sequencia(s) enviada(s) para a pilha finalizada. +${removedRuns * 120} XP`,
+    `${removedRuns} sequência(s) enviada(s) para a pilha de concluídas. +${removedRuns * 120} XP`,
     false
   );
 
@@ -2272,7 +2244,7 @@ function resolveCompletedRun(columnIndex) {
     saveStudentRoundScore();
     createGameRecordForCurrentStudent("win");
     updateStudentMatches();
-    setMessage(els.gameMessage, "Vitoria total estilo Spider! +250 XP bonus.");
+    setMessage(els.gameMessage, "Vitória total no estilo Spider! Bônus de +250 XP.");
     openWinModal();
   }
 }
@@ -2285,7 +2257,7 @@ function dealFromStock() {
 
   const columnsWithCards = state.board.every((col) => col.length > 0);
   if (!columnsWithCards) {
-    setMessage(els.gameMessage, "Preencha colunas vazias antes de distribuir.", true);
+    setMessage(els.gameMessage, "Preencha as colunas vazias antes de distribuir.", true);
     return;
   }
 
@@ -2347,7 +2319,7 @@ function undoLastAction() {
   renderStudentSidebar();
   renderBoard();
   renderCompletedRuns();
-  setMessage(els.gameMessage, "Ultima jogada desfeita.");
+  setMessage(els.gameMessage, "Última jogada desfeita.");
 }
 
 function awardStudent(points) {
@@ -2430,13 +2402,13 @@ function renderStudentSidebar() {
 
   if (els.challengeObjective) {
     const objective = state.gameConfig.suitCount
-      ? `Monte sequencias completas 13-1 do mesmo naipe (${state.gameConfig.suitCount} naipe(s)).`
+      ? `Monte sequências completas de 13 a 1 do mesmo naipe (${state.gameConfig.suitCount} naipe(s)).`
       : "Escolha os naipes para iniciar o desafio.";
     els.challengeObjective.textContent = objective;
   }
 
   if (els.streakInfo) {
-    els.streakInfo.textContent = `${state.currentUser.matches || 0} vitorias`;
+    els.streakInfo.textContent = `${state.currentUser.matches || 0} vitórias`;
   }
 
   const validMoves = state.gameStats.moves || 0;
@@ -2484,10 +2456,10 @@ function renderStudentSidebar() {
 
     const rows = users.slice(0, 4).map((user, index) => {
       const isCurrent = user.id === state.currentUser.id;
-      const label = isCurrent ? "Voce" : user.name;
+      const label = isCurrent ? "Você" : user.name;
       return `
         <div class="ranking-item ${isCurrent ? "current" : ""}">
-          <span class="rank-pos">${index + 1}o</span>
+          <span class="rank-pos">${index + 1}º</span>
           <span class="rank-name">${label}</span>
           <strong class="rank-xp">${user.xp || 0} XP</strong>
         </div>

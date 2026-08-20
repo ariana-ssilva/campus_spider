@@ -1,32 +1,32 @@
 [
   {
     "view": "home",
-    "icon": "⌂",
+    "icon": "fa-solid fa-house",
     "label": "Início"
   },
   {
     "view": "modules",
-    "icon": "▦",
+    "icon": "fa-solid fa-layer-group",
     "label": "Módulos"
   },
   {
     "view": "challenges",
-    "icon": "◈",
+    "icon": "fa-solid fa-bullseye",
     "label": "Desafios"
   },
   {
     "view": "ranking",
-    "icon": "🏆",
+    "icon": "fa-solid fa-ranking-star",
     "label": "Ranking"
   },
   {
     "view": "profile",
-    "icon": "◉",
+    "icon": "fa-solid fa-circle-user",
     "label": "Perfil"
   },
   {
     "view": "about",
-    "icon": "ⓘ",
+    "icon": "fa-solid fa-circle-info",
     "label": "Sobre"
   }
 ]

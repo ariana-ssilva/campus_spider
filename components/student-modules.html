@@ -11,17 +11,32 @@
         <button type="button" class="btn-outline" data-target-view="home"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Voltar ao início</button>
       </div>
     </div>
-    <div class="module-overview-grid">
+    <div class="module-summary" aria-label="Resumo dos módulos">
       <div class="mini-stats-grid" id="homeHighlights"></div>
-      <article class="info-card">
-        <h3>Recomendação do momento</h3>
-        <p id="homeRecommendedTheme">-</p>
+    </div>
+    <div class="module-insights">
+      <article class="info-card module-recommendation">
+        <div class="info-card-heading">
+          <span class="section-icon"><i class="fa-solid fa-compass" aria-hidden="true"></i></span>
+          <h3>Recomendação do momento</h3>
+        </div>
+        <p id="homeRecommendedTheme" class="module-featured-theme">-</p>
         <p id="homeRecommendedAction" class="stacked-text">-</p>
       </article>
-      <article class="info-card">
-        <h3>Temas disponíveis</h3>
+      <article class="info-card module-topics">
+        <div class="info-card-heading">
+          <span class="section-icon"><i class="fa-solid fa-list-check" aria-hidden="true"></i></span>
+          <h3>Temas disponíveis</h3>
+        </div>
         <ul id="homeThemeList" class="bullet-list"></ul>
       </article>
+    </div>
+    <div class="module-section-heading">
+      <div>
+        <p class="eyebrow">Trilha de estudo</p>
+        <h3>Explore por tema</h3>
+      </div>
+      <span class="module-section-hint">Escolha um assunto para revisar</span>
     </div>
     <div class="module-grid" id="moduleGrid"></div>
   </div>
