@@ -1277,6 +1277,7 @@ button {
     linear-gradient(180deg, #0c7c52 0%, #0a6b46 100%);
   border-radius: 22px;
   padding: 1rem;
+  overflow-x: auto;
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 18px 32px rgba(10, 61, 38, 0.18);
 }
@@ -1568,8 +1569,8 @@ button {
   color: #111827;
   max-width: 96%;
   white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  overflow-wrap: break-word;
+  word-break: normal;
   line-height: 1.02;
   letter-spacing: 0.01em;
 }
@@ -1585,8 +1586,8 @@ button {
   text-align: center;
   max-width: 96%;
   white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  overflow-wrap: break-word;
+  word-break: normal;
   line-height: 1.04;
 }
 
@@ -2102,94 +2103,245 @@ button {
     display: none;
   }
 
-  .teacher-home-grid,
-  .module-overview-grid {
-
-    .brand-subtitle,
-    .level-pill,
-    .xp-pill,
-    .icon-btn,
-    .avatar-pill {
-      display: none;
-    }
-
-    .student-layout {
-      grid-template-columns: 1fr;
-    }
-
-    .mini-stats-grid,
-    .profile-grid,
-    .teacher-home-grid,
-    .module-overview-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .profile-card-hero {
-      grid-row: auto;
-    }
-
-    .auth-split {
-      grid-template-columns: 1fr;
-      min-height: 100vh;
-    }
-
-    .auth-brand-side {
-      min-height: 250px;
-      padding: 2rem;
-    }
-
-    .auth-brand-side h2 {
-      font-size: 2.4rem;
-    }
-
-    .auth-brand-copy {
-      font-size: 1.25rem;
-    }
-
-    .teacher-form-actions {
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    main {
-      width: 100%;
-    }
+  .brand-subtitle,
+  .level-pill,
+  .xp-pill,
+  .icon-btn,
+  .avatar-pill {
+    display: none;
   }
 
-  @media (max-width: 780px) {
-    .board-topbar {
-      flex-direction: column;
-    }
+  .student-layout {
+    grid-template-columns: 1fr;
+  }
 
-    .stock-area {
-      width: 100%;
-      flex-direction: row;
-      justify-content: space-between;
-    }
+  .mini-stats-grid,
+  .profile-grid,
+  .teacher-home-grid,
+  .module-overview-grid {
+    grid-template-columns: 1fr;
+  }
 
-    .board-metrics {
-      flex-direction: column;
-    }
+  .profile-card-hero {
+    grid-row: auto;
+  }
 
-    .board {
-      grid-template-columns: repeat(2, 1fr);
-    }
+  .auth-split {
+    grid-template-columns: 1fr;
+    min-height: 100vh;
+  }
 
-    .column {
-      min-height: 200px;
-    }
+  .auth-brand-side {
+    min-height: 250px;
+    padding: 2rem;
+  }
 
-    .view-head {
-      flex-direction: column;
-    }
+  .auth-brand-side h2 {
+    font-size: 2.4rem;
+  }
 
-    .view-head-actions {
-      width: 100%;
-    }
+  .auth-brand-copy {
+    font-size: 1.25rem;
+  }
 
-    .view-head-actions .btn-primary,
-    .view-head-actions .btn-outline {
-      width: 100%;
-    }
+  .teacher-form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  main {
+    width: 100%;
+  }
+}
+
+@media (max-width: 780px) {
+  .board-topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .stock-area {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .board-metrics {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(10, minmax(52px, 1fr));
+    min-width: 540px;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+  }
+
+  .column {
+    min-height: 200px;
+  }
+
+  .view-head {
+    flex-direction: column;
+  }
+
+  .view-head-actions {
+    width: 100%;
+  }
+
+  .view-head-actions .btn-primary,
+  .view-head-actions .btn-outline {
+    width: 100%;
+  }
+
+  .completed-board {
+    grid-template-columns: repeat(8, minmax(38px, 1fr));
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 540px) {
+  .profile-grid,
+  .teacher-home-grid,
+  .module-overview-grid,
+  .mini-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .module-card-topline {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .auth-card {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .board {
+    grid-template-columns: repeat(10, 82px);
+    min-width: 820px;
+    width: 820px;
+  }
+
+  .board:has(.board-empty-state) {
+    grid-template-columns: 1fr;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .game-board-wrap:has(.board-empty-state) .board-topbar {
+    display: none;
+  }
+
+  .card {
+    min-width: 82px;
+    min-height: 118px;
+    height: 118px;
+    aspect-ratio: auto;
+    margin-top: 0;
+    font-size: 0.82rem;
+  }
+
+  .card-word {
+    margin-top: 2rem;
+    font-size: 0.72rem;
+    line-height: 1.12;
+  }
+
+  .card-theme {
+    font-size: 0.62rem;
+    line-height: 1.12;
+  }
+
+  .stock-btn {
+    width: 68px;
+    height: 92px;
+  }
+
+  .game-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .game-controls > * {
+    width: 100%;
+  }
+
+  .auth-card h2 {
+    font-size: 1.6rem;
+  }
+
+  .auth-card .btn-primary,
+  .btn-primary,
+  .btn-outline {
+    min-height: 48px;
+    padding-top: 0.9rem;
+    padding-bottom: 0.9rem;
+  }
+
+  .topbar {
+    padding: 0.7rem 0.75rem;
+  }
+
+  .session-info {
+    max-width: 120px;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .auth-form-side {
+    padding: 1.25rem 0.9rem;
+  }
+
+  .auth-brand-side {
+    min-height: 200px;
+    padding: 1.5rem 1rem 1.1rem;
+  }
+
+  .auth-brand-side h2 {
+    font-size: 2.1rem;
+  }
+
+  .auth-brand-copy {
+    font-size: 1.05rem;
+  }
+
+  .auth-card {
+    width: min(100%, 100%);
+    border-radius: 14px;
+  }
+
+  .board {
+    min-width: 820px;
+    width: 820px;
+  }
+
+  .stock-area {
+    align-items: flex-start;
+  }
+
+  .stock-btn {
+    width: 58px;
+    height: 80px;
+  }
+
+  .modal-card {
+    padding: 0.9rem;
+    border-radius: 12px;
+  }
+
+  .delete-modal-actions,
+  .congrats-actions {
+    flex-direction: column;
+  }
+
+  .delete-modal-actions > *,
+  .congrats-actions > * {
+    width: 100%;
   }
 }
